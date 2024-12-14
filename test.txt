@@ -1,198 +1,72 @@
-document.addEventListener('DOMContentLoaded', function() {
-    var socket = io.connect('https://' + document.domain + ':' + location.port);
+from flask import Flask, request, jsonify
+from flask_socketio import SocketIO
+import sqlite3
+import uuid
+from datetime import datetime
 
-    socket.on('connect', function() {
-        console.log('Connected to WebSocket');
-    });
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-    socket.on('friend_request', function(data) {
-        addFriendRequestToDOM(data);
-    });
+def get_db_connection():
+    conn = sqlite3.connect('example.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
-    socket.on('update_contacts', function(data) {
-        var hasContactsElement = document.getElementById('has_contacts');
-        if (hasContactsElement) {
-            print(hasContactsElement.value)
-            hasContactsElement.value = data.has_contacts;
-            print(hasContactsElement.value)
-            // Optionnel : Mettre à jour d'autres parties de l'interface utilisateur en conséquence
-        }
-    });
-    socket.on('remove_friend_request', function(data){
-        console.log(data)
-    });
-    var contactId = current_conv_with_user;  // Remplace par l'ID réel du contact
-    // Récupérer l'ID de l'utilisateur courant
-    fetch('/get_user_id')
-    .then(response => response.json())
-    .then(data => {
-        var userId = data.user_id;
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    session_cookie = request.cookies.get('session_cookie')
+    data = request.get_json()
+    contact_id = data.get('contact_id')
+    message_content = data.get('message')
 
-        socket.on('connect', function() {
-            socket.emit('join', { user_id: userId });
-        });
+    if not session_cookie:
+        return jsonify({'error': 'Session non valide'}), 401
 
-        socket.on('receive_message', function(data) {
-            if (data.to === userId) {
-                addMessageToDOM(data);
-            }
-        });
+    if not contact_id or not message_content:
+        return jsonify({'error': 'Contact ID et message requis'}), 400
 
-        // Ajouter le message au DOM
-        function addMessageToDOM(message) {
-            var conversationsContainer = document.getElementById('conversation_user');
-            var senderInfo = message.sender_id === userId ? 'self' : 'other';
-            console.log(message)
-            var div = document.createElement('div');
-            div.className = `message ${senderInfo === 'self' ? 'self' : ''}`;
-            div.innerHTML = `
-                        <div class="message-wrap">
-                        <div class="message-item">
-                            <div class="message-content">
-                                <span>${message.message || 'Aucun message'}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="message-info">
-                        <div class="avatar avatar-sm">
-                            <img src="data:image/png;base64,${senderInfo.profile_image}" alt="Profile Image" class="avatar-label bg-soft-primary text-primary fs-6">
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM users WHERE session_cookie = ?', (session_cookie,))
+        user = cursor.fetchone()
 
-                        </div>
-                        <div>
-                            <h6 class="mb-0">${senderInfo.first_name} ${senderInfo.last_name}</h6>
-                            <small class="text-muted">${new Date(message.send_time).toLocaleString()}</small>
-                        </div>
-                    </div>
-                `;
-            conversationsContainer.appendChild(div);
-        }
+    if not user:
+        return jsonify({'error': 'Utilisateur introuvable'}), 404
 
-        // Fonction pour envoyer un message
-        var messageInput = document.getElementById('message_input');
-        messageInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                var message = messageInput.value;
+    user_id = user['id']
 
-                fetch('/send_message', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contact_id: contactId,
-                        message: message
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        messageInput.value = '';
-                        // Ajouter le message au DOM
-                        addMessageToDOM({
-                            sender_id: userId,
-                            message: message,
-                            send_time: new Date().toISOString(),
-                            profile_image: '', // Vous pouvez ajouter la bonne image ici
-                            first_name: '', // Vous pouvez ajouter le bon prénom ici
-                            last_name: '' // Vous pouvez ajouter le bon nom ici
-                        });
-                        // Envoyer le message via WebSocket
-                        socket.emit('send_message', {
-                            contact_id: contactId,
-                            sender_id: userId,
-                            message: message,
-                            send_time: new Date().toISOString()
-                        });
-                    } else {
-                        console.error('Erreur:', data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                });
-            }
-        });
+    # Insérer le message dans la table conversations
+    message_id = str(uuid.uuid4())  # Générer un identifiant unique pour le message
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO conversations (id, user_id, contact_id, last_message, publish_at)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (message_id, user_id, contact_id, message_content, datetime.utcnow()))
+        conn.commit()
 
-        // Initialiser les messages existants
-        fetch(`/get_messages/${contactId}`)
-        .then(response => response.json())
-        .then(data => {
-            data.messages.forEach(message => addMessageToDOM(message));
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-        });
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-    });
-    
+    # Envoyer le message via WebSocket
+    socketio.emit('receive_message', {
+        'id': message_id,
+        'sender_id': user_id,
+        'message': message_content,
+        'send_time': datetime.utcnow().isoformat() + 'Z',
+        'to': contact_id
+    }, room=contact_id)
 
-    function addFriendRequestToDOM(request) {
-        var requestsContainer = document.getElementById('requestsFriendsRequest');
+    return jsonify({'success': True, 'message_id': message_id})
 
-        var div = document.createElement('div');
-        div.setAttribute('name', request.request_id);
-        print(request.request_id)
-        div.className = 'card mb-3';
-        div.innerHTML = `
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="avatar me-4">
-                        <img src="data:image/png;base64,${request.profile_image || ''}" alt="${request.requester_first_name || ''} ${request.requester_last_name || ''}" class="avatar-label bg-soft-success text-success" style="border-radius: 50%; width: 50px; height: 50px;">
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center overflow-hidden">
-                            <h5 class="me-auto text-break mb-0">${request.requester_first_name || 'N/A'} ${request.requester_last_name || 'N/A'}</h5>
-                            <span class="small text-muted text-nowrap ms-2">04:45 PM</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <div class="line-clamp me-auto">Vous a envoyé une demande d'ami</div>
-                            <div class="dropdown ms-5">
-                                <button class="btn btn-icon btn-base btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="ri-more-fill"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">See less often</a></li>
-                                    <li><a class="dropdown-item" href="#">Hide</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <div class="row gx-4">
-                    <div class="col">
-                        <a href="#" class="btn btn-secondary btn-sm w-100">Refuser</a>
-                    </div>
-                    <div class="col">
-                        <button onclick="acceptFriendRequest('${request.request_id}')" class="btn btn-primary btn-sm w-100">Accepter</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        requestsContainer.appendChild(div);
-    }
+@socketio.on('send_message')
+def handle_send_message(data):
+    socketio.emit('receive_message', data, room=data['contact_id'])
 
-fetch('/friend_requests')
-    .then(response => response.json())
-    .then(data => {
-        var requestsContainer = document.getElementById('requestsFriendsRequest');
-        requestsContainer.innerHTML = '';
+@socketio.on('typing')
+def handle_typing(data):
+    socketio.emit('typing', data, room=data['to'])
 
-        if (data.length === 0) {
-            requestsContainer.textContent = 'Aucune demande d\'ami reçue.';
-            return;
-        }
-        console.log(data);
+@socketio.on('stop_typing')
+def handle_stop_typing(data):
+    socketio.emit('stop_typing', data, room=data['to'])
 
-        data.forEach(function(request) {
-            addFriendRequestToDOM(request);
-        });
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-    });
-});
+if __name__ == '__main__':
+    socketio.run(app, debug=True)

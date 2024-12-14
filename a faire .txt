@@ -1,0 +1,11 @@
+notifs
+changer mdp
+reset mdp
+changer de nom ; de pp ; email et de num de tel
+les niv d admin
+les ban / expulse temp
+refuser les demande d ami
+retirer un amis
+suprr des message / modifier
+crée les groupes
+    

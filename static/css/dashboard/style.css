@@ -477,9 +477,6 @@ progress{
     width:100%;
 }
 
-.autoscroll{
-    overflow: auto;
-}
 @media (min-width:576px){
     .container,.container-sm{
         max-width:540px
@@ -19724,7 +19721,7 @@ textarea.form-control-lg{
     flex-direction:column
 }
 .message+.message{
-    margin-top:1rem
+    margin-top:0.5rem
 }
 .message .message-item+.message-item{
     margin-top:1rem
