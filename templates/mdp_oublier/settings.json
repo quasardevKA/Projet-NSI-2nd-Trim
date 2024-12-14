@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Whatsupp",
+            "database": "${workspaceFolder:Projet-NSI-2nd-Trim}/db.sqlite"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

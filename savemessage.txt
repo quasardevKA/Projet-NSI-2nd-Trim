@@ -1,0 +1,62 @@
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/user_conversations')
+    .then(response => response.json())
+    .then(data => {
+        var conversationsContainer = document.getElementById('conversation_user');
+        conversationsContainer.innerHTML = '';
+
+        if (data.length === 0) {
+            conversationsContainer.textContent = 'Aucune conversation trouvée.';
+            return;
+        }
+
+        data.forEach(function(conversation) {
+            var div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = `
+                <div class="message-wrap">
+                    <div class="message-item">
+                        <div class="message-content">
+                            <span>${conversation.last_message || 'Aucun message'}</span>
+                        </div>
+                        <div class="dropdown align-self-center">
+                            <button class="btn btn-icon btn-base btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-more-2-fill"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Edit
+                                        <i class="ri-edit-line"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Share
+                                        <i class="ri-share-line"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Delete
+                                        <i class="ri-delete-bin-line"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-info">
+                    <div class="avatar avatar-sm">
+                        <span class="avatar-label bg-soft-primary text-primary fs-6">${conversation.first_name[0]}${conversation.last_name[0]}</span>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">${conversation.first_name || 'N/A'} ${conversation.last_name || 'N/A'}</h6>
+                        <small class="text-muted">${conversation.last_message_time || ''}</small>
+                    </div>
+                </div>
+            `;
+            conversationsContainer.appendChild(div);
+        });
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+    });
+});

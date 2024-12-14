@@ -1,0 +1,153 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Calibri', sans-serif;
+}
+
+#main-container {
+    width: 100%;
+    background: linear-gradient(#051f30, #000000);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+#report {
+    width: 90%;
+    max-width: 600px;
+    background: linear-gradient(#051f30, #000000);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 20px auto;
+}
+
+.menu {
+    height: 100%;
+    transition: width 0.3s;
+    background: rgba(255, 255, 255, 0.07);
+    padding: 20px 0 20px 20px;
+    width: 85px;
+    box-shadow: 8px 0 9px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(5px);
+    min-height: 100vh;
+    margin: auto 0;
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    
+}
+
+.menu:hover {
+    width: 260px;
+}
+
+.menu:hover li span:nth-child(2) {
+    display: block;
+}
+
+.menu-content li {
+    list-style: none;
+    border-radius: 0 50px 50px 0;
+    transition: background 0.3s;
+    margin-bottom: 35px;
+    padding-left: -5px;
+}
+
+.menu-content li:hover {
+    background: #0c0c0c;
+}
+
+.menu-content li span:nth-child(2) {
+    display: none;
+}
+
+a {
+    text-decoration: none;
+    color: rgb(213, 213, 213);
+    display: flex;
+    align-items: center;
+    font-family: 'Calibri', sans-serif;
+}
+
+.material-symbols-outlined {
+    font-size: 25px;
+    margin-right: 10px;
+    background: #0c0c0c;
+    border-radius: 50%;
+    padding: 10px;
+}
+
+center {
+    display: flex;
+    align-items: center;
+    margin: 20px;
+}
+
+table {
+    border: 2px solid #ffffff;
+    height: 250px;
+    width: 2000px;
+    border-radius: 20px;
+}
+
+img {
+    height: 75px;
+    width: 75px;
+    border-radius: 50%;
+}
+
+tr {
+    color: #ffffff;
+}
+
+h2 {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: grey;
+    font-size: 40px;
+}
+
+.ban, .refuse {
+    color: #000000;
+    width: 50px;
+    height: 28px;
+    border-radius: 15px;
+    text-align: center;
+    line-height: 28px;
+}
+
+.ban {
+    background-color: #e10f0f;
+}
+
+.refuse {
+    background-color: #0eed0e;
+}
+
+.bouton {
+    padding: 3px;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 600px) {
+    #report {
+        width: 95%;
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 30px;
+    }
+
+    .ban, .refuse {
+        width: 40px;
+        height: 24px;
+        line-height: 24px;
+    }
+}

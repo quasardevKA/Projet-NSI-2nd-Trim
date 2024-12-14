@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>Se connecter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/style.css') }}">
+</head>
+
+<body>
+    <!-- Layout -->
+    <div class="layout bg-light h-100">
+        <div class="container h-100">
+            <div class="row align-items-center justify-content-center g-0 h-100">
+                <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+                    <!-- Heading -->
+                    <h2 class="text-center mb-1">Se Connecter</h2>
+                    <!-- Heading -->
+
+                    <!-- Text -->
+                    <p class="text-center mb-4">Se connecter pour continuer vers WhatsUpp</p>
+                    <!-- Text -->
+
+                    <!-- Card -->
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <!-- Form -->
+                            <form class="mb-4">
+                                <!-- Email -->
+                                <div class="mb-4">
+                                    <label for="email" class="mb-2">Nom d'utilisateur</label>
+                                    <input type="email" id="email" class="form-control form-control-solid form-control-lg" placeholder="Enter your login or email">
+                                </div>
+                                <!-- Email -->
+
+                                <!-- Password -->
+                                <div class="mb-4">
+                                    <label for="password" class="mb-2">Mot de passe</label>
+                                    <input type="password" id="password" class="form-control form-control-solid form-control-lg" placeholder="Enter your password">
+                                </div>
+                                <!-- Password -->
+
+                                <!-- Remember -->
+                                <div class="d-flex justify-content-between mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="remember-check" checked>
+                                        <label class="form-check-label" for="remember-check">
+                                            Se souvernir de moi
+                                        </label>
+                                    </div>
+                                    <a href="reset.html" class="no-underline">Mot de passe oublié</a>
+                                </div>
+                                <!-- Remember -->
+
+                                <!-- Button -->
+                                <div class="d-grid">
+                                    <button class="btn btn-lg btn-primary" type="submit">Se connecter</button>
+                                </div>
+                                <!-- Button -->
+                            </form>
+                            <!-- Form -->
+
+                            <!-- Text -->
+                            <p class="text-center mb-0">
+                                Vous n'avez pas de compte ?
+                                <a href="signup.html">S'enregistrer</a>
+                            </p>
+                            <!-- Text -->
+                        </div>
+                    </div>
+                    <!-- Card -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Layout -->
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard/app.min.js') }}"></script>
+    <!-- Scripts -->
+</body>
+</html>

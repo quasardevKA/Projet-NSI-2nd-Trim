@@ -1,0 +1,198 @@
+document.addEventListener('DOMContentLoaded', function() {
+    var socket = io.connect('https://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function() {
+        console.log('Connected to WebSocket');
+    });
+
+    socket.on('friend_request', function(data) {
+        addFriendRequestToDOM(data);
+    });
+
+    socket.on('update_contacts', function(data) {
+        var hasContactsElement = document.getElementById('has_contacts');
+        if (hasContactsElement) {
+            print(hasContactsElement.value)
+            hasContactsElement.value = data.has_contacts;
+            print(hasContactsElement.value)
+            // Optionnel : Mettre à jour d'autres parties de l'interface utilisateur en conséquence
+        }
+    });
+    socket.on('remove_friend_request', function(data){
+        console.log(data)
+    });
+    var contactId = current_conv_with_user;  // Remplace par l'ID réel du contact
+    // Récupérer l'ID de l'utilisateur courant
+    fetch('/get_user_id')
+    .then(response => response.json())
+    .then(data => {
+        var userId = data.user_id;
+
+        socket.on('connect', function() {
+            socket.emit('join', { user_id: userId });
+        });
+
+        socket.on('receive_message', function(data) {
+            if (data.to === userId) {
+                addMessageToDOM(data);
+            }
+        });
+
+        // Ajouter le message au DOM
+        function addMessageToDOM(message) {
+            var conversationsContainer = document.getElementById('conversation_user');
+            var senderInfo = message.sender_id === userId ? 'self' : 'other';
+            console.log(message)
+            var div = document.createElement('div');
+            div.className = `message ${senderInfo === 'self' ? 'self' : ''}`;
+            div.innerHTML = `
+                        <div class="message-wrap">
+                        <div class="message-item">
+                            <div class="message-content">
+                                <span>${message.message || 'Aucun message'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message-info">
+                        <div class="avatar avatar-sm">
+                            <img src="data:image/png;base64,${senderInfo.profile_image}" alt="Profile Image" class="avatar-label bg-soft-primary text-primary fs-6">
+
+                        </div>
+                        <div>
+                            <h6 class="mb-0">${senderInfo.first_name} ${senderInfo.last_name}</h6>
+                            <small class="text-muted">${new Date(message.send_time).toLocaleString()}</small>
+                        </div>
+                    </div>
+                `;
+            conversationsContainer.appendChild(div);
+        }
+
+        // Fonction pour envoyer un message
+        var messageInput = document.getElementById('message_input');
+        messageInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                var message = messageInput.value;
+
+                fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contact_id: contactId,
+                        message: message
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        messageInput.value = '';
+                        // Ajouter le message au DOM
+                        addMessageToDOM({
+                            sender_id: userId,
+                            message: message,
+                            send_time: new Date().toISOString(),
+                            profile_image: '', // Vous pouvez ajouter la bonne image ici
+                            first_name: '', // Vous pouvez ajouter le bon prénom ici
+                            last_name: '' // Vous pouvez ajouter le bon nom ici
+                        });
+                        // Envoyer le message via WebSocket
+                        socket.emit('send_message', {
+                            contact_id: contactId,
+                            sender_id: userId,
+                            message: message,
+                            send_time: new Date().toISOString()
+                        });
+                    } else {
+                        console.error('Erreur:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+            }
+        });
+
+        // Initialiser les messages existants
+        fetch(`/get_messages/${contactId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.messages.forEach(message => addMessageToDOM(message));
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+    });
+    
+
+    function addFriendRequestToDOM(request) {
+        var requestsContainer = document.getElementById('requestsFriendsRequest');
+
+        var div = document.createElement('div');
+        div.setAttribute('name', request.request_id);
+        print(request.request_id)
+        div.className = 'card mb-3';
+        div.innerHTML = `
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="avatar me-4">
+                        <img src="data:image/png;base64,${request.profile_image || ''}" alt="${request.requester_first_name || ''} ${request.requester_last_name || ''}" class="avatar-label bg-soft-success text-success" style="border-radius: 50%; width: 50px; height: 50px;">
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center overflow-hidden">
+                            <h5 class="me-auto text-break mb-0">${request.requester_first_name || 'N/A'} ${request.requester_last_name || 'N/A'}</h5>
+                            <span class="small text-muted text-nowrap ms-2">04:45 PM</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="line-clamp me-auto">Vous a envoyé une demande d'ami</div>
+                            <div class="dropdown ms-5">
+                                <button class="btn btn-icon btn-base btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="ri-more-fill"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">See less often</a></li>
+                                    <li><a class="dropdown-item" href="#">Hide</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row gx-4">
+                    <div class="col">
+                        <a href="#" class="btn btn-secondary btn-sm w-100">Refuser</a>
+                    </div>
+                    <div class="col">
+                        <button onclick="acceptFriendRequest('${request.request_id}')" class="btn btn-primary btn-sm w-100">Accepter</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        requestsContainer.appendChild(div);
+    }
+
+fetch('/friend_requests')
+    .then(response => response.json())
+    .then(data => {
+        var requestsContainer = document.getElementById('requestsFriendsRequest');
+        requestsContainer.innerHTML = '';
+
+        if (data.length === 0) {
+            requestsContainer.textContent = 'Aucune demande d\'ami reçue.';
+            return;
+        }
+        console.log(data);
+
+        data.forEach(function(request) {
+            addFriendRequestToDOM(request);
+        });
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+    });
+});

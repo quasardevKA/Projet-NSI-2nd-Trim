@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whatsupp</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/style.css') }}">
+    
+</head>
+
+<body>
+    <!-- Layout -->
+    <div class="layout">
+        <!-- Navigation -->
+        <div class="navigation navbar border-end h-100 py-6">
+            <!-- Logo -->
+            <a class="logo d-none d-xl-block mb-6" href="#">
+                <img src="{{ url_for('static', filename='img/dashboard/logo_dashboard.png') }}" alt="">
+            </a>
+            <!-- Logo -->
+
+            <!-- Nav -->
+            <ul class="nav nav-pills" role="tablist">
+                <!-- Create chat -->
+                {% if has_contacts %}
+                <li class="nav-item mt-xl-auto mb-5" role="presentation">
+                    <a class="nav-link" data-bs-toggle="pill" href="#create-chat-tab" role="tab" aria-selected="false" title="Créer une discussion">
+                        <i class="ri-quill-pen-line"></i>
+                    </a>
+                </li>
+                <!-- Create chat -->
+
+                <!-- Friends -->
+                <li class="nav-item mb-5" role="presentation">
+                    <a class="nav-link" data-bs-toggle="pill" href="#friends-tab" role="tab" aria-selected="false" title="Friends">
+                        <i class="ri-group-line"></i>
+                    </a>
+                </li>
+                <!-- Friends -->
+
+                <!-- Chats -->
+                <li class="nav-item mb-5" role="presentation">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#chats-tab" role="tab" aria-selected="true" title="Chats">
+                        <i class="ri-chat-3-line"></i>
+                    </a>
+                </li>
+                <!-- Chats -->
+
+                <!-- Notifications -->
+                <li class="nav-item mb-5" role="presentation">
+                    <a class="nav-link" data-bs-toggle="pill" href="#notifications-tab" role="tab" aria-selected="false" title="Notifications">
+                        <i class="ri-notification-3-line"></i>
+                    </a>
+                </li>
+                <!-- Notifications -->
+                {% if is_admin %}
+                    <!-- Reports -->
+                    <li class="nav-item mb-5  mt-xl-auto mb-5" role="presentation">
+                        <a class="nav-link" href="/reports" title="Reports">
+                            <i class="ri-auction-fill"></i>
+                        </a>
+                    </li>
+                    <!-- Reports -->
+                    <!-- Admin -->
+                    <li class="nav-item mb-5" role="presentation">
+                        <a class="nav-link" href="/admin" title="Admin">
+                            <i class="ri-shield-star-line"></i>
+                        </a>
+                    </li>
+                    <!-- Admin -->
+                    <!-- Settings -->
+                    <li class="nav-item mb-5" role="presentation">
+                        <a class="nav-link" data-bs-toggle="pill" href="#settings-tab" role="tab" aria-selected="false" title="Settings">
+                            <i class="ri-settings-4-line"></i>
+                        </a>
+                    </li>
+                    <!-- Settings -->
+                {% else %}
+                    <!-- Settings -->
+                    <li class="nav-item mb-5  mt-xl-auto mb-5" role="presentation">
+                        <a class="nav-link" data-bs-toggle="pill" href="#settings-tab" role="tab" aria-selected="false" title="Settings">
+                            <i class="ri-settings-4-line"></i>
+                        </a>
+                    </li>
+                    <!-- Settings -->
+                {% endif %}
+
+                {% else %}
+
+                <!-- Friends -->
+                <li class="nav-item mb-5 mt-xl-auto mb-5" role="presentation">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#friends-tab" role="tab" aria-selected="true" title="Friends">
+                        <i class="ri-group-line"></i>
+                    </a>
+                </li>
+                <!-- Friends -->
+
+                <!-- Notifications -->
+                <li class="nav-item mb-5" role="presentation">
+                    <a class="nav-link" data-bs-toggle="pill" href="#notifications-tab" role="tab" aria-selected="false" title="Notifications">
+                        <i class="ri-notification-3-line"></i>
+                    </a>
+                </li>
+                <!-- Notifications -->
+                
+                <!-- Settings -->
+                <li class="nav-item mb-5 mt-xl-auto mb-5" role="presentation">
+                    <a class="nav-link" data-bs-toggle="pill" href="#settings-tab" role="tab" aria-selected="false" title="Settings">
+                        <i class="ri-settings-4-line"></i>
+                    </a>
+                </li>
+                <!-- Settings -->
+                {% endif %}
+                <!-- Avatar -->
+                <li class="nav-item" role="presentation">
+                    <a class="text-decoration-none" href="#" data-bs-toggle="modal" data-bs-target="#modal-account" title="Account">
+                        <div class="avatar avatar-online avatar-sm">
+                            <!-- Remplacer ce span par une balise img avec l'image en base64 -->
+                            <img src="data:image/png;base64, {{ user['profile_image'] }}" alt="Profile Image" class="avatar-label bg-soft-success text-success fs-6" style="border-radius: 50%;">
+                        </div>
+                    </a>
+                </li>             
+                <!-- Avatar -->
+            </ul>
+            <!-- Nav -->
+        </div>
+        <!-- Navigation -->
+
+        <!-- Sidebar -->
+        <div class="sidebar border-end overflow-hidden h-100">
+            <div class="tab-content h-100">
+                <!-- Create Chat Tab -->
+                <div class="tab-pane fade h-100" id="create-chat-tab" role="tabpanel">
+                    <div class="d-flex flex-column h-100">
+                        <!-- Tab Header -->
+                        <div class="tab-header d-flex align-items-center border-bottom">
+                            <ul class="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
+                                <!-- Title -->
+                                <li>
+                                    <h3 class="mb-0">Créer une discussion</h3>
+                                </li>
+                                <!-- Title -->
+
+                                <!-- Buttons -->
+                                <li>
+                                    <ul class="list-inline">
+                                        <!-- Menu Button -->
+                                        <li class="list-inline-item">
+                                            <button type="button" class="navigation-toggle btn btn-secondary btn-icon d-xl-none">
+                                                <i class="ri-menu-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Menu Button -->
+                                    </ul>
+                                </li>
+                                <!-- Buttons -->
+                            </ul>
+                        </div>
+                        <!-- Tab Header -->
+
+                        <!-- Search Input -->
+                        <div class="m-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg form-control-solid" id="search-member-input" placeholder="Rechercher" aria-label="Search member" aria-describedby="search-member-button">
+                                <button class="btn btn-secondary btn-lg" type="button" id="search-member-button" onclick="NewConvWithUser()"></button>
+                            </div>
+                        </div>
+                        
+                        
+                        <!-- Search Input -->
+
+                        <!-- Segmented Control -->
+                        <div class="text-center mb-4">
+                            <ul class="nav nav-pills nav-segmented" id="group-pills" role="tablist">
+                                <!-- Direct Nav Item -->
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="pills-create-group-tab" data-bs-toggle="pill" href="#create-group-tab" role="tab" aria-controls="pills-create-group-tab" aria-selected="true">Groupe</a>
+                                </li>
+                                <!-- Direct Nav Item -->
+                        
+                                <!-- Group Nav Item -->
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="pills-select-member-tab" data-bs-toggle="pill" href="#select-member-tab" role="tab" aria-controls="pills-select-member-tab" aria-selected="false">Membres</a>
+                                </li>
+                                <!-- Group Nav Item -->
+                            </ul>
+                        </div>
+                        <!-- Segmented Control -->
+
+                        <!-- Tab Content -->
+                        <div class="hide-scrollbar h-100">
+                            <div class="tab-content m-4 mt-0">
+                                <div class="tab-pane fade show active" id="create-group-tab" role="tabpanel">
+                                    <!-- Group Card -->
+                                    <div class="card mb-3">
+                                        <div class="card-body pt-0">
+                                            <!-- Profile -->
+                                            <div class="profile text-center">
+                                                <div class="profile-img text-primary">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" fill="currentColor">
+                                                        <defs>
+                                                            <style>
+                                                                .st1 {
+                                                                    fill: #fff;
+                                                                    opacity: 0.1;
+                                                                }
+                                                            </style>
+                                                        </defs>
+                                                        <path d="M300,0v80c0,11-9,20-20,20H20C9,100,0,91,0,80V0H300z" />
+                                                        <path class="st1" d="M50,71c-16,0-29,13-29,29h10c0-10.5,8.5-19,19-19s19,8.5,19,19h10C79,84,66,71,50,71z" />
+                                                        <path class="st1" d="M31.6,0H21.3C21.8,1.6,22,3.3,22,5c0,10.5-8.5,19-19,19c-1,0-2-0.1-3-0.2v10.1C1,34,2,34,3,34c16,0,29-13,29-29
+                                                                                                                            C32,3.3,31.8,1.6,31.6,0z" />
+                                                        <path class="st1" d="M238.5,58C217.3,58,200,75.3,200,96.5c0,1.2,0,2.3,0.2,3.5h10.1c-0.1-1.2-0.2-2.3-0.2-3.5
+                                                                                                                            c0-15.7,12.8-28.5,28.5-28.5S267,80.8,267,96.5c0,1.2-0.1,2.3-0.2,3.5h10.1c0.1-1.2,0.2-2.3,0.2-3.5C277,75.3,259.7,58,238.5,58z" />
+                                                        <path class="st1" d="M299,22c-11,0-20-9-20-20c0-0.7,0-1.3,0.1-2h-10C269,0.7,269,1.3,269,2c0,16.5,13.5,30,30,30c0.3,0,0.7,0,1,0
+                                                                                                                            V22C299.7,22,299.3,22,299,22z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="profile-content">
+                                                    <div class="avatar avatar-lg">
+                                                        <span class="avatar-label bg-success text-white fs-3">
+                                                            <i class="ri-image-line"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Profile -->
+                                
+                                            <!-- Group Name Input -->
+                                            <div class="my-4">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Nom du groupe" aria-label="Group name">                                                    
+                                                </div>
+                                            </div>
+                                            <!-- Group Name Input -->
+                                
+                                            <!-- About Input -->
+                                            <div class="mb-4">
+                                                <div class="input-group">
+                                                    <textarea class="form-control form-control-lg form-control-solid" placeholder="Description" rows="3"></textarea>
+                                                </div>
+                                            </div>
+                                            <!-- About Input -->
+                                        </div>
+                                    </div>
+                                    <!-- Group Card -->
+
+                                    <!-- Title -->
+                                    <div class="d-flex align-items-center mx-4 mb-3">
+                                        <small class="text-muted me-auto">Options</small>
+                                    </div>
+                                    <!-- Title -->
+
+                                    <!-- Options -->
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="row align-items-center gx-4">
+                                                <!-- Icon -->
+                                                <div class="col-auto">
+                                                    <div class="avatar">
+                                                        <span class="avatar-label text-muted fs-1">
+                                                            <i class="ri-chat-private-line"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <!-- Icon -->
+                                    
+                                                <!-- Content -->
+                                                <div class="col">
+                                                    <h5 class="mb-1">Rendre le groupe privé</h5>
+                                                    <p class="text-muted mb-0">Visible pour les membres seulement</p>
+                                                </div>
+                                                <!-- Content -->
+                                    
+                                                <!-- Button -->
+                                                <div class="col-auto">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="" id="private-check" checked>
+                                                    </div>
+                                                </div>
+                                                <!-- Button -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Options -->
+                                </div>
+                                <div class="tab-pane fade" id="select-member-tab" role="tabpanel">
+                                    <!-- Contact List A -->
+                                    <div>
+                                        <!-- Letter -->
+                                        <h5 class="p-2 text-primary">
+                                            A
+                                        </h5>
+                                        <!-- Letter -->
+                                    
+                                        <!--  Friends List -->
+                                        <ul class="list-unstyled">
+                                            <!-- Chat Link -->
+                                            <li class="card contact-item">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar avatar-online me-4">
+                                                            <span class="avatar-label bg-soft-primary text-primary">AM</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Ariel Martinez
+                                                                </h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En Ligne</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-1">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link -->
+                                        </ul>
+                                        <!--  Friends List -->
+                                    </div>
+                                    <!-- Contact List A -->
+                                    
+                                    <!-- Contact List C -->
+                                    <div>
+                                        <!-- Letter -->
+                                        <h5 class="p-2 text-primary">
+                                            C
+                                        </h5>
+                                        <!-- Letter -->
+                                    
+                                        <!--  Friends List -->
+                                        <ul class="list-unstyled">
+                                            <!-- Chat Link -->
+                                            <li class="card contact-item">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar avatar-away me-4">
+                                                            <span class="avatar-label">CS</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Chris Solomon</h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En Ligne récemment</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-2">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link -->
+                                        </ul>
+                                        <!--  Friends List -->
+                                    </div>
+                                    <!-- Contact List C -->
+                                    
+                                    <!-- Contact List D -->
+                                    <div>
+                                        <!-- Letter -->
+                                        <h5 class="p-2 text-primary">
+                                            D
+                                        </h5>
+                                        <!-- Letter -->
+                                    
+                                        <!--  Friends List -->
+                                        <ul class="list-unstyled">
+                                            <!-- Chat Link 1 -->
+                                            <li class="card contact-item mb-3">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar avatar-online me-4">
+                                                            <span class="avatar-label bg-info text-white">DR</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Deborah Redd
+                                                                </h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En Ligne</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-3">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link 1 -->
+                                    
+                                            <!-- Chat Link 2 -->
+                                            <li class="card contact-item">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar me-4">
+                                                            <span class="avatar-label bg-success text-white">DG</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Donald Graves
+                                                                </h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En Ligne il y a 4j</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-4">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link 2 -->
+                                        </ul>
+                                        <!--  Friends List -->
+                                    </div>
+                                    <!-- Contact List D -->
+                                    
+                                    <!-- Contact List J -->
+                                    <div>
+                                        <!-- Letter -->
+                                        <h5 class="p-2 text-primary">
+                                            J
+                                        </h5>
+                                        <!-- Letter -->
+                                    
+                                        <!--  Friends List -->
+                                        <ul class="list-unstyled">
+                                            <!-- Chat Link 1 -->
+                                            <li class="card contact-item mb-3">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar avatar-busy me-4">
+                                                            <span class="avatar-label bg-soft-info text-info">JP</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Jerry Prater
+                                                                </h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En Ligne Récemment</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-5">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link 1 -->
+                                    
+                                            <!-- Chat Link 2 -->
+                                            <li class="card contact-item">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar avatar-online me-4">
+                                                            <span class="avatar-label bg-danger text-white">JS</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Joe Stoner</h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En ligne</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-6">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link 2 -->
+                                        </ul>
+                                        <!--  Friends List -->
+                                    </div>
+                                    <!-- Contact List J -->
+                                    
+                                    <!-- Contact List K -->
+                                    <div>
+                                        <!-- Letter -->
+                                        <h5 class="p-2 text-primary">
+                                            K
+                                        </h5>
+                                        <!-- Letter -->
+                                    
+                                        <!--  Friends List -->
+                                        <ul class="list-unstyled">
+                                            <!-- Chat Link 1 -->
+                                            <li class="card contact-item mb-3">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar avatar-online me-4">
+                                                            <span class="avatar-label bg-soft-success text-success">KC</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Katherine Cassidy
+                                                                </h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En Ligne</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-7">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link 1 -->
+                                    
+                                            <!-- Chat Link 2 -->
+                                            <li class="card contact-item">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar me-4">
+                                                            <span class="avatar-label bg-warning text-white">KS</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Kelly Smith</h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">Hors Ligne depuis longtemps</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-8">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link 2 -->
+                                        </ul>
+                                        <!--  Friends List -->
+                                    </div>
+                                    <!-- Contact List K -->
+                                    
+                                    <!-- Contact List M -->
+                                    <div>
+                                        <!-- Letter -->
+                                        <h5 class="p-2 text-primary">
+                                            M
+                                        </h5>
+                                        <!-- Letter -->
+                                    
+                                        <!--  Friends List -->
+                                        <ul class="list-unstyled mb-1">
+                                            <!-- Chat Link -->
+                                            <li class="card contact-item">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <!-- Avatar -->
+                                                        <div class="avatar me-4">
+                                                            <span class="avatar-label bg-primary text-white">MC</span>
+                                                        </div>
+                                                        <!-- Avatar -->
+                                    
+                                                        <!-- Content -->
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <div class="d-flex align-items-center mb-1">
+                                                                <h5 class="text-truncate mb-0 me-auto">Maurice Coleman
+                                                                </h5>
+                                                            </div>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="text-truncate me-auto">En Ligne il y a 2 mois</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                    
+                                                        <!-- Check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="check-member-9">
+                                                        </div>
+                                                        <!-- Check -->
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <!-- Chat Link -->
+                                        </ul>
+                                        <!--  Friends List -->
+                                    </div>
+                                    <!-- Contact List M -->
+                                </div>                                
+                            </div>
+                        </div>
+                        <!-- Tab Content -->
+
+                        <!-- Create Chat Footer -->
+                        <div class="create-chat-footer border-top p-4">
+                            <button class="btn btn-lg btn-primary w-100">Créer une discussion</button>
+                        </div>
+                        <!-- Create Chat Footer -->
+                    </div>
+                </div>
+                <!-- Create Chat Tab -->
+
+                <!-- Friends Tab -->
+                {% if not has_contacts %}
+                <div class="tab-pane fade show active h-100" id="friends-tab" role="tabpanel">
+                {% else %}
+                <div class="tab-pane fade h-100" id="friends-tab" role="tabpanel">
+                {% endif %}
+                    <div class="d-flex flex-column h-100">
+                        <!-- Tab Header -->
+                        <div class="tab-header d-flex align-items-center border-bottom">
+                            <ul class="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
+                                <!-- Title -->
+                                <li>
+                                    <h3 class="mb-0">Amis</h3>
+                                </li>
+                                <!-- Title -->
+
+                                <!-- Buttons -->
+                                <li>
+                                    <ul class="list-inline">
+                                        <!-- Menu Button -->
+                                        <li class="list-inline-item">
+                                            <button type="button" class="navigation-toggle btn btn-secondary btn-icon d-xl-none">
+                                                <i class="ri-menu-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Menu Button -->
+                                    </ul>
+                                </li>
+                                <!-- Buttons -->
+                            </ul>
+                        </div>
+                        <!-- Tab Header -->
+
+                        <!-- Search Input -->
+                        <div class="m-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Ajouter des amis" id="search-input" aria-label="Search friends" aria-describedby="search-friends-button" onkeyup="searchUsers()">
+                                <button class="btn btn-secondary btn-lg" type="button" id="search-friends-button"><i class="ri-search-line"></i></button>
+                            </div>
+                        </div>
+                        <!-- Search Input -->
+
+                        <!-- Tab Content -->
+                        <div class="hide-scrollbar h-100">
+                            <div class="m-4">
+                                <!-- Contact List A -->
+                                <div>
+                                    <!-- Letter -->
+                                    <h5 class="p-2 text-primary">
+                                        <div id="results"></div>
+                                    </h5>
+                                    <!-- Letter -->
+
+                                    <!--  Friends List -->
+                                    <ul class="list-unstyled" id="results"></ul>
+                                    <!-- Chat Link -->
+                                    <!--  Friends List -->
+                                </div>
+                                <!-- Contact List A -->
+                            </div>
+                        </div>
+                        <!-- Tab Content -->
+
+                        <!-- Invite Footer -->
+
+                        <!-- Invite Footer -->
+                    </div>
+                </div>
+                <!-- Friends Tab -->
+
+                <!-- Chats Tab -->
+                {% if not has_contacts %}
+                <div class="tab-pane fade h-100" id="chats-tab" role="tabpanel">
+                {% else %}
+                <div class="tab-pane fade show active h-100" id="chats-tab" role="tabpanel">
+                {% endif %}
+                
+                    <div class="d-flex flex-column h-100">
+                        <!-- Tab Header -->
+                        <div class="tab-header d-flex align-items-center border-bottom">
+                            <ul class="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
+                                <!-- Title -->
+                                <li>
+                                    <h3 class="mb-0">Discussions</h3>
+                                </li>
+
+                                
+                                <!-- Title -->
+
+                                <!-- Buttons -->
+                                <li>
+                                    <ul class="list-inline">
+                                        <!-- Menu Button -->
+                                        <li class="list-inline-item">
+                                            <button type="button" class="navigation-toggle btn btn-secondary btn-icon d-xl-none">
+                                                <i class="ri-menu-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Menu Button -->                                        
+                                    </ul>
+                                </li>
+                                
+                                <!-- Buttons -->
+                            </ul>
+                        </div>
+                        <!-- Tab Header -->
+
+                        <!-- Search Input -->
+                        <div class="m-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Rechercher" aria-label="Rechercher" aria-describedby="search-user-button">
+                                <button class="btn btn-secondary btn-lg" type="button" id="search-user-button"><i class="ri-search-line"></i></button>
+                            </div>
+                        </div>
+                        <!-- Search Input -->
+
+                        <!-- Segmented Control -->
+                        <div class="text-center mb-3">
+                            <ul class="nav nav-pills nav-segmented" id="pills-tab" role="tablist">
+                                <!-- Direct Nav Item -->
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="pills-direct-tab" data-bs-toggle="pill" href="#direct-tab" role="tab" aria-controls="pills-direct-tab" aria-selected="true">Direct</a>
+                                </li>
+                                <!-- Direct Nav Item -->
+
+                                <!-- Group Nav Item -->
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="pills-group-tab" data-bs-toggle="pill" href="#groups-tab" role="tab" aria-controls="pills-group-tab" aria-selected="false">Groupes</a>
+                                </li>
+                                <!-- Group Nav Item -->
+                            </ul>
+                        </div>
+                        <!-- Segmented Control -->
+
+                        <!-- Tab Content -->
+                        <div class="hide-scrollbar h-100">
+                            <div class="tab-content m-4 mt-1">
+                                <!-- Direct Chats Tab -->
+                                <div class="tab-pane fade show active" id="direct-tab" role="tabpanel">
+                                    <ul id="list-contacts" class="list-unstyled js-contact-list mb-0">
+                                        <!-- Chat Link 9 -->
+                                    </ul>
+                                </div>
+                                <!-- Direct Chats Tab -->
+
+                                <!-- Group Chats Tab -->
+                                <div class="tab-pane fade" id="groups-tab" role="tabpanel">
+                                    <ul class="list-unstyled js-contact-list mb-0">
+                                        <!-- Chat Link 1 -->
+                                        <li class="card contact-item mb-3">
+                                            <a href="chat-group-dark.html" class="contact-link"></a>
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <!-- Avatar -->
+                                                    <div class="avatar avatar-online me-4">
+                                                        <span class="avatar-label bg-soft-info text-info">JP</span>
+                                                    </div>
+                                                    <!-- Avatar -->
+
+                                                    <!-- Content -->
+                                                    <div class="flex-grow-1 overflow-hidden">
+                                                        <div class="d-flex align-items-center mb-1">
+                                                            <h5 class="text-truncate mb-0 me-auto">Jerry Prater</h5>
+                                                            <p class="small text-muted text-nowrap ms-4 mb-0">11:45 AM</p>
+                                                        </div>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="line-clamp me-auto">Hi, John, can you show a photo from the last meeting, I would like to have a look at all of you.</div>
+                                                            <span class="badge rounded-pill bg-primary ms-2">5</span>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Content -->
+                                                </div>
+                                            </div>
+                                            <div class="card-footer d-flex align-items-center justify-content-between overflow-hidden">
+                                                <h5 class="mb-0 text-truncate">General</h5>
+                                                <p class="mb-0 small text-muted text-nowrap">35 Members</p>
+                                            </div>
+                                        </li>
+                                        <!-- Chat Link 1 -->
+
+                                        <!-- Chat Link 2 -->
+                                        <li class="card contact-item mb-3">
+                                            <a href="#" class="contact-link"></a>
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <!-- Avatar -->
+                                                    <div class="avatar avatar-online me-4">
+                                                        <span class="avatar-label bg-soft-success text-success">KC</span>
+                                                    </div>
+                                                    <!-- Avatar -->
+
+                                                    <!-- Content -->
+                                                    <div class="flex-grow-1 overflow-hidden">
+                                                        <div class="d-flex align-items-center mb-1">
+                                                            <h5 class="text-truncate mb-0 me-auto">Katherine Cassidy</h5>
+                                                            <p class="small text-muted text-nowrap ms-4 mb-0">1:30 PM</p>
+                                                        </div>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="line-clamp me-auto">Here are the latest files from our project, I'm waiting for your positive feedback. Write me as soon as you are free.</div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Content -->
+                                                </div>
+                                            </div>
+                                            <div class="card-footer d-flex align-items-center justify-content-between overflow-hidden">
+                                                <h5 class="mb-0 text-truncate">Design Team</h5>
+                                                <p class="mb-0 small text-muted text-nowrap">15 Members</p>
+                                            </div>
+                                        </li>
+                                        <!-- Chat Link 2 -->
+
+                                        <!-- Chat Link 3 -->
+                                        <li class="card contact-item">
+                                            <a href="#" class="contact-link"></a>
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <!-- Avatar -->
+                                                    <div class="avatar me-4">
+                                                        <span class="avatar-label bg-warning text-white">KS</span>
+                                                    </div>
+                                                    <!-- Avatar -->
+
+                                                    <!-- Content -->
+                                                    <div class="flex-grow-1 overflow-hidden">
+                                                        <div class="d-flex align-items-center mb-1">
+                                                            <h5 class="text-truncate mb-0 me-auto">Kelly Smith</h5>
+                                                            <p class="small text-muted text-nowrap ms-4 mb-0">2:55 PM</p>
+                                                        </div>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="line-clamp me-auto">The design of the apartment looks great, I will focus on this option.</div>
+                                                            <span class="badge rounded-pill bg-primary ms-2">2</span>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Content -->
+                                                </div>
+                                            </div>
+                                            <div class="card-footer d-flex align-items-center justify-content-between overflow-hidden">
+                                                <h5 class="mb-0 text-truncate">Real Estate</h5>
+                                                <p class="mb-0 small text-muted text-nowrap">21 Members</p>
+                                            </div>
+                                        </li>
+                                        <!-- Chat Link 3 -->
+                                    </ul>
+                                </div>
+                                <!-- Group Chats Tab -->
+                            </div>
+                        </div>
+                        <!-- Tab Content -->
+                    </div>
+                </div>
+                <!-- Chats Tab -->
+
+                <!-- Notification Tab -->
+                <div class="tab-pane fade h-100" id="notifications-tab" role="tabpanel">
+                    <div class="d-flex flex-column h-100">
+                        <!-- Tab Header -->
+                        <div class="tab-header d-flex align-items-center border-bottom">
+                            <ul class="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
+                                <!-- Title -->
+                                <li>
+                                    <h3 class="mb-0">Notifications</h3>
+                                </li>
+                                <!-- Title -->
+
+                                <!-- Buttons -->
+                                <li>
+                                    <ul class="list-inline">
+                                        <!-- Menu Button -->
+                                        <li class="list-inline-item">
+                                            <button type="button" class="navigation-toggle btn btn-secondary btn-icon d-xl-none">
+                                                <i class="ri-menu-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Menu Button -->
+                                    </ul>
+                                </li>
+                                <!-- Buttons -->
+                            </ul>
+                        </div>
+                        <!-- Tab Header -->
+
+                        <!-- Search Input -->
+                        <!-- Search Input -->
+
+                        <!-- Tab Content -->
+                        <div class="hide-scrollbar h-100">
+                            <div class="m-4 mt-0">
+                                <!-- Today -->
+                                <br>
+                                <!-- Today -->
+
+                                <!-- Yesterday -->
+                                <div class="notification-list">
+                                    <!-- Title -->
+                                    <div class="d-flex align-items-center mx-4 mb-3">
+                                        <small class="text-muted me-auto"></small>
+                                        <a href="#" class="text-muted small">Tous effacer</a>
+                                    </div>
+                                    <!-- Title -->
+                                    <div id="requestsFriendsRequest"></div>
+                                    <!-- Card -->
+                                    <!-- Card -->
+
+                                    <!-- Card -->
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <!-- Avatar -->
+                                                <div class="avatar me-4">
+                                                    <span class="avatar-label fs-3">
+                                                        <i class="ri-settings-4-line"></i>
+                                                    </span>
+                                                </div>
+                                                <!-- Content -->
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex align-items-center overflow-hidden mb-1">
+                                                        <h5 class="mb-0 text-break me-auto">Equipe WhatsUpp</h5>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="line-clamp me-auto">Bienvenue {{ user['first_name'] }} {{ user['last_name'] }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Content -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Card -->
+                                </div>
+                                <!-- Yesterday -->
+                            </div>
+                        </div>
+                        <!-- Tab Content -->
+                    </div>
+                </div>
+                <!-- Notification Tab -->
+
+                <!-- Settings Tab -->
+                <div class="tab-pane fade h-100" id="settings-tab" role="tabpanel">
+                    <div class="d-flex flex-column h-100">
+                        <!-- Tab Header -->
+                        <div class="tab-header d-flex align-items-center border-bottom">
+                            <ul class="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
+                                <!-- Title -->
+                                <li>
+                                    <h3 class="mb-0">Paramètres</h3>
+                                </li>
+                                <!-- Title -->
+
+                                <!-- Buttons -->
+                                <li>
+                                    <ul class="list-inline">
+                                        <!-- Menu Button -->
+                                        <li class="list-inline-item">
+                                            <button type="button" class="navigation-toggle btn btn-secondary btn-icon d-xl-none">
+                                                <i class="ri-menu-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Menu Button -->
+                                    </ul>
+                                </li>
+                                <!-- Buttons -->
+                            </ul>
+                        </div>
+                        <!-- Tab Header -->
+
+                        <!-- Search Input -->
+                        <div class="m-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Search settings" aria-label="Rechercher" aria-describedby="search-settings-button">
+                                <button class="btn btn-secondary btn-lg" type="button" id="search-settings-button">
+                                    <i class="ri-search-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Search Input -->
+
+                        <!-- Tab Content -->
+                        <div class="hide-scrollbar h-100">
+                            <div class="m-4 mt-0">
+                                <!-- Profile -->
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Avatar -->
+                                            <div class="col-auto">
+                                                <div class="avatar avatar-online">
+                                                    <img src="data:image/png;base64,{{ user['profile_image'] }}" alt="Profile Image" class="avatar-label bg-soft-success text-success fs-6" style="border-radius: 50%;">
+                                                </div>
+                                            </div>
+                                            <!-- Avatar -->
+
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">{{ user['first_name'] }} {{ user['last_name'] }}</h5>
+                                                <p class="text-muted mb-0">{{ user['email'] }}</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <button id="logout_button" class="btn btn-sm btn-icon btn-base">
+                                                <i class="ri-logout-box-line"></i>
+                                            </button>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Profile -->
+
+                                <!-- Account -->
+                                <div class="mb-3">
+                                    <!-- Title -->
+                                    <div class="d-flex align-items-center mx-4 mb-3">
+                                        <small class="text-muted me-auto">Compte</small>
+                                    </div>
+                                    <!-- Title -->
+
+                                    <!-- Accordion -->
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="accordion accordion-flush" id="accordion-account-settings">
+                                                <div class="accordion-item">
+                                                    <div class="accordion-header" id="account-heading-1">
+                                                        <div class="accordion-button collapsed p-0 pb-4" role="button" data-bs-toggle="collapse" data-bs-target="#account-collapse-1" aria-expanded="false" aria-controls="account-collapse-1">
+                                                            <div>
+                                                                <h5 class="mb-1">Paramètre de compte</h5>
+                                                                <p class="text-muted mb-0">Modifier votre compte</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="account-collapse-1" class="accordion-collapse collapse" aria-labelledby="account-heading-1">
+                                                        <div class="accordion-body p-0 pb-4">
+                                                            <!-- Name Input -->
+                                                            <div class="mb-4">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Name" aria-label="Name">
+                                                                </div>
+                                                            </div>
+                                                            <!-- Name Input -->
+
+                                                            <!-- Email Input -->
+                                                            <div class="mb-4">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Email" aria-label="Email">
+                                                                </div>
+                                                            </div>
+                                                            <!-- Email Input -->
+
+                                                            <!-- Phone Input -->
+                                                            <div class="mb-4">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Phone" aria-label="Phone">
+                                                                </div>
+                                                            </div>
+                                                            <!-- Phone Input -->
+
+                                                            <!-- About Input -->
+                                                            <div class="mb-4">
+                                                                <div class="input-group">
+                                                                    <textarea class="form-control form-control-lg form-control-solid" placeholder="About text" rows="3"></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <!-- About Input -->
+
+                                                            <!-- Button -->
+                                                            <button class="btn btn-lg btn-primary w-100">Sauvegarder</button>
+                                                            <!-- Button -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="accordion-item">
+                                                    <div class="accordion-header" id="account-heading-2">
+                                                        <div class="accordion-button collapsed p-0 pt-4" role="button" data-bs-toggle="collapse" data-bs-target="#account-collapse-2" aria-expanded="false" aria-controls="account-collapse-2">
+                                                            <div>
+                                                                <h5 class="mb-1">Comptes sociaux</h5>
+                                                                <p class="text-muted mb-0">Liée à votre compte</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="account-collapse-2" class="accordion-collapse collapse" aria-labelledby="account-heading-2">
+                                                        <div class="accordion-body p-0 pt-4">
+                                                            <!-- Google Input -->
+                                                            <div class="mb-4">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Google" aria-label="Google">
+                                                                </div>
+                                                            </div>
+                                                            <!-- Google Input -->
+
+                                                            <!-- Twitter Input -->
+                                                            <div class="mb-4">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Twitter" aria-label="Twitter">
+                                                                </div>
+                                                            </div>
+                                                            <!-- Twitter Input -->
+
+                                                            <!-- Facebook Input -->
+                                                            <div class="mb-4">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Facebook" aria-label="Facebook">
+                                                                </div>
+                                                            </div>
+                                                            <!-- Facebook Input -->
+
+                                                            <!-- Button -->
+                                                            <button class="btn btn-lg btn-primary w-100">Sauvegarder</button>
+                                                            <!-- Button -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Accordion -->
+                                </div>
+                                <!-- Account -->
+
+                                <!-- Security -->
+                                <div class="mb-3">
+                                    <!-- Title -->
+                                    <div class="d-flex align-items-center mx-4 mb-3">
+                                        <small class="text-muted me-auto">Sécurité</small>
+                                    </div>
+                                    <!-- Title -->
+
+                                    <!-- Accordion -->
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="accordion accordion-flush" id="accordion-security-settings">
+                                                <div class="accordion-item">
+                                                    <div class="accordion-header" id="security-heading-1">
+                                                        <div class="accordion-button collapsed p-0 pb-4" role="button" data-bs-toggle="collapse" data-bs-target="#security-collapse-1" aria-expanded="false" aria-controls="security-collapse-1">
+                                                            <div>
+                                                                <h5 class="mb-1">Paramètre de mot de passe</h5>
+                                                                <p class="text-muted mb-0">Gérer votre mot de passe</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="security-collapse-1" class="accordion-collapse collapse" aria-labelledby="security-heading-1">
+                                                        <div class="accordion-body p-0 pb-4">
+                                                            <!-- Current password -->
+                                                            <form action="/change_password" method="post">
+                                                                <div class="mb-4">
+                                                                    <div class="input-group">
+                                                                        <input type="password" class="form-control form-control-lg form-control-solid" placeholder="Current password" aria-label="Current password" required autocomplete="current-password">
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Current password -->
+
+                                                                <!-- New password -->
+                                                                <div class="mb-4">
+                                                                    <div class="input-group">
+                                                                        <input type="password" class="form-control form-control-lg form-control-solid" placeholder="New password" aria-label="New password" required autocomplete="new-password">
+                                                                    </div>
+                                                                </div>
+                                                                <!-- New password -->
+
+                                                                <!-- Confirm password -->
+                                                                <div class="mb-4">
+                                                                    <div class="input-group">
+                                                                        <input type="password" class="form-control form-control-lg form-control-solid" placeholder="Confirm password" aria-label="Confirm password" required autocomplete="confirm-new-password">
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                            <!-- Confirm password -->
+
+                                                            <!-- Button -->
+                                                            <button class="btn btn-lg btn-primary w-100">Sauvegarder</button>
+                                                            <!-- Button -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="accordion-item">
+                                                    <div class="accordion-header">
+                                                        <div class="row align-items-center mt-4">
+                                                            <div class="col">
+                                                                <h5 class="mb-1">Vérification à deux facteurs</h5>
+                                                                <p class="text-muted mb-0">Activé la Vérification à deux facteurs</p>
+                                                            </div>
+                                                            <div class="col-auto">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="switch-authentication" checked>                                                                    
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Accordion -->
+                                </div>
+                                <!-- Security -->
+
+                                <!-- Notifications -->
+                                <div class="mb-3">
+                                    <!-- Title -->
+                                    <div class="d-flex align-items-center mx-4 mb-3">
+                                        <small class="text-muted me-auto">Notifications</small>
+                                    </div>
+                                    <!-- Title -->
+
+                                    <!-- Accordion -->
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="accordion accordion-flush" id="accordion-notification-settings">
+                                                <div class="accordion-item">
+                                                    <div class="accordion-header" id="notification-heading-1">
+                                                        <div class="accordion-button collapsed p-0 pb-4" role="button" data-bs-toggle="collapse" data-bs-target="#notification-collapse-1" aria-expanded="false" aria-controls="notification-collapse-1">
+                                                            <div>
+                                                                <h5 class="mb-1">Notifications</h5>
+                                                                <p class="text-muted mb-0">Paramètre de Notifications</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="notification-collapse-1" class="accordion-collapse collapse" aria-labelledby="notification-heading-1">
+                                                        <div class="accordion-body p-0 pb-4">
+                                                            <ul class="list-group list-group-flush">
+                                                                <li class="list-group-item p-0 pb-4">
+                                                                    <div class="row align-items-center">
+                                                                        <div class="col">
+                                                                            <h5 class="mb-1">Effets sonores</h5>
+                                                                            <p class="text-muted mb-0">Activer le son de notification</p>
+                                                                        </div>
+                                                                        <div class="col-auto">
+                                                                            <div class="form-check form-switch">
+                                                                                <input class="form-check-input" type="checkbox" id="switch-sound-notification">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li class="list-group-item p-0 pt-4">
+                                                                    <div class="row align-items-center">
+                                                                        <div class="col">
+                                                                            <h5 class="mb-1">Notification de navigateur</h5>
+                                                                            <p class="text-muted mb-0">Recevoir des notifications du navigateur</p>
+                                                                        </div>
+                                                                        <div class="col-auto">
+                                                                            <div class="form-check form-switch">
+                                                                                <input class="form-check-input" type="checkbox" id="switch-browser-notification" checked>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="accordion-item">
+                                                    <div class="accordion-header">
+                                                        <div class="row align-items-center mt-4">
+                                                            <div class="col">
+                                                                <h5 class="mb-1">Confirmation de lecture</h5>
+                                                                <p class="text-muted mb-0">Activer la confirmation de lecture</p>
+                                                            </div>
+                                                            <div class="col-auto">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="switch-receipts">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Accordion -->
+                                </div>
+                                <!-- Notifications -->
+
+                                <!-- Activity -->
+                                <div class="mb-3">
+                                    <!-- Title -->
+                                    <div class="d-flex align-items-center mx-4 mb-3">
+                                        <small class="text-muted me-auto">Dernières activités</small>
+                                        <a href="#" class="text-muted small">Se déconnecter de tous les appareils </a>
+                                    </div>
+                                    <!-- Title -->
+
+                                    <!-- Card -->
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item p-0 pb-4">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <h5 class="mb-1">Windows &middot; USA, NY</h5>
+                                                            <p class="text-muted mb-0">Today at 1:25 PM | Browser: Edge</p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item p-0 pt-4">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <h5 class="mb-1">Android &middot; USA, NY</h5>
+                                                            <p class="text-muted mb-0">Today at 7:25 AM | Browser: Chrome</p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- Card -->
+                                </div>
+                                <!-- Activity -->
+                            </div>
+                        </div>
+                        <!-- Tab Content -->
+                    </div>
+                </div>
+                <!-- Settings Tab -->
+                
+                <!-- Demo Tab -->
+                <div class="tab-pane fade show active h-100" id="demo-tab" role="tabpanel">
+                    <div class="d-flex flex-column h-100">
+                        <!-- Tab Header -->
+                        <div class="tab-header d-flex align-items-center border-bottom">
+                            <ul class="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
+                                <!-- Title -->
+                                <li>
+                                    <h3 class="mb-0">Demo Pages</h3>
+                                </li>
+                                <!-- Title -->
+
+                                <!-- Buttons -->
+                                <li>
+                                    <ul class="list-inline">
+                                        <!-- Menu Button -->
+                                        <li class="list-inline-item">
+                                            <button type="button" class="navigation-toggle btn btn-secondary btn-icon d-xl-none">
+                                                <i class="ri-menu-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Menu Button -->                                        
+                                    </ul>
+                                </li>
+                                <!-- Buttons -->
+                            </ul>
+                        </div>
+                        <!-- Tab Header -->
+
+                        <!-- Search Input -->
+                        <div class="m-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Search demo" aria-label="Search demo" aria-describedby="search-demo-button">
+                                <button class="btn btn-secondary btn-lg" type="button" id="search-demo-button"><i class="ri-search-line"></i></button>
+                            </div>
+                        </div>
+                        <!-- Search Input -->                       
+
+                        <!-- Tab Content -->
+                        <div class="hide-scrollbar h-100 m-4 mt-0">
+                            <ul class="list-unstyled mb-0">
+                                <!-- Documentation -->
+                                <li class="card contact-item mb-3">
+                                    <a href="documentation/index.html" class="contact-link"></a>
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Avatar -->
+                                            <div class="col-auto">
+                                                <img src="{{ url_for('static', filename='img/dashboard/logo_dashboard.png') }}" alt="logo">
+                                            </div>
+                                            <!-- Avatar -->
+
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">Documentation</h5>
+                                                <p class="text-muted text-nowrap mb-0">Quick setup guide</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-icon btn-base"><i class="ri-arrow-right-s-line"></i></button>
+                                            </div>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Documentation -->
+
+                                <!-- Auto Theme -->
+                                <li class="card contact-item mb-3">
+                                    <a href="index.html" class="contact-link"></a>
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Avatar -->
+                                            <div class="col-auto">
+                                                <div class="avatar avatar-sm">
+                                                    <span class="avatar-label bg-primary text-white fs-3"><i class="ri-contrast-line"></i></span>
+                                                </div>
+                                            </div>
+                                            <!-- Avatar -->
+
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">Auto Theme</h5>
+                                                <p class="text-muted text-nowrap mb-0">Automatic switch theme</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-icon btn-base"><i class="ri-arrow-right-s-line"></i></button>
+                                            </div>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Auto Theme -->
+
+                                <!-- Light Theme -->
+                                <li class="card contact-item mb-3">
+                                    <a href="chat-direct-light.html" class="contact-link"></a>
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Avatar -->
+                                            <div class="col-auto">
+                                                <div class="avatar avatar-sm">
+                                                    <span class="avatar-label bg-primary text-white fs-3"><i class="ri-sun-line"></i></span>
+                                                </div>
+                                            </div>
+                                            <!-- Avatar -->
+
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">Light Theme</h5>
+                                                <p class="text-muted text-nowrap mb-0">Apply light theme</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-icon btn-base"><i class="ri-arrow-right-s-line"></i></button>
+                                            </div>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Light Theme -->
+
+                                <!-- Dark Theme -->
+                                <li class="card contact-item mb-3">
+                                    <a href="chat-direct-dark.html" class="contact-link"></a>
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Avatar -->
+                                            <div class="col-auto">
+                                                <div class="avatar avatar-sm">
+                                                    <span class="avatar-label bg-primary text-white fs-3"><i class="ri-moon-line"></i></span>
+                                                </div>
+                                            </div>
+                                            <!-- Avatar -->
+
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">Dark Theme</h5>
+                                                <p class="text-muted text-nowrap mb-0">Apply dark theme</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-icon btn-base"><i class="ri-arrow-right-s-line"></i></button>
+                                            </div>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Dark Theme -->
+
+                                <!-- Sign In -->
+                                <li class="card contact-item mb-3">
+                                    <a href="signin.html" class="contact-link"></a>
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">Sign In</h5>
+                                                <p class="text-muted text-nowrap mb-0">Sign In Page</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-icon btn-base"><i class="ri-arrow-right-s-line"></i></button>
+                                            </div>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Sign In -->
+
+                                <!-- Sign Up -->
+                                <li class="card contact-item mb-3">
+                                    <a href="signup.html" class="contact-link"></a>
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">Sign Up</h5>
+                                                <p class="text-muted text-nowrap mb-0">Sign Up Page</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-icon btn-base"><i class="ri-arrow-right-s-line"></i></button>
+                                            </div>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Sign Up -->
+
+                                <!-- Reset Password -->
+                                <li class="card contact-item">
+                                    <a href="reset.html" class="contact-link"></a>
+                                    <div class="card-body">
+                                        <div class="row align-items-center gx-4">
+                                            <!-- Content -->
+                                            <div class="col">
+                                                <h5 class="mb-1">Reset Password</h5>
+                                                <p class="text-muted text-nowrap mb-0">Reset Password Page</p>
+                                            </div>
+                                            <!-- Content -->
+
+                                            <!-- Button -->
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-icon btn-base"><i class="ri-arrow-right-s-line"></i></button>
+                                            </div>
+                                            <!-- Button -->
+                                        </div>
+                                    </div>
+                                </li>
+                                <!-- Reset Password -->
+                            </ul>
+                        </div>
+                        <!-- Tab Content -->
+                    </div>
+                </div>
+                <!-- Demo Tab -->
+            </div>
+        </div>
+        <!-- Sidebar -->
+
+        <!-- Main Content -->
+        <div class="main main-visible overflow-hidden h-100">
+            <div class="chat d-flex flex-row h-100">
+                <!-- Chat -->
+                <div class="chat-body h-100 w-100 d-flex flex-column">
+                    <!-- Chat Header -->
+                    <div class="chat-header d-flex align-items-center border-bottom px-2">
+                        {% if has_contacts %}
+                        <div class="container-fluid">
+                            <div class="row align-items-center g-0">
+                                <div class="col-8 col-sm-5">
+                                    <div class="d-flex align-items-center">
+                                        <!-- Close Chat Button -->
+                                        <div class="d-block d-xl-none me-3">
+                                            <button class="chat-hide btn btn-icon btn-base btn-sm" type="button">
+                                                <i class="ri-arrow-left-s-line"></i>
+                                            </button>
+                                        </div>
+                                        <!-- Close Chat Button -->
+
+                                        <!-- Avatar -->
+                                        <div class="avatar avatar-online avatar-sm me-3">
+                                            <img src="data:image/png;base64,{{ user_conv['profile_image'] }}" alt="Profile Image" class="avatar-label bg-soft-success text-success fs-6" style="border-radius: 50%;">
+                                        </div>
+                                        <!-- Avatar -->
+
+                                        <!-- Text -->
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <h6 class="d-block text-truncate mb-1">{{ user_conv['first_name'] }} {{ user_conv['last_name'] }}</h6>
+                                            <p class="d-block text-truncate text-success fs-6 mb-0">En Ligne</p>
+                                        </div>
+                                        <!-- Text -->
+                                    </div>
+                                </div>
+                                <div class="col-4 col-sm-7">
+                                    <ul class="list-inline text-end mb-0">
+                                        <!-- Search Button -->
+                                        <li class="list-inline-item d-none d-sm-inline-block">
+                                            <button class="btn btn-icon btn-base" type="button" title="Search" data-bs-toggle="collapse" data-bs-target="#search-chat" aria-expanded="false">
+                                                <i class="ri-search-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Search Button -->
+
+                                        <!-- Chat Info Button -->
+                                        <li class="list-inline-item d-none d-sm-inline-block">
+                                            <button class="chat-info-toggle btn btn-icon btn-base" title="Chat info" type="button">
+                                                <i class="ri-user-3-line"></i>
+                                            </button>
+                                        </li>
+                                        <!-- Chat Info Button -->
+
+                                        <!-- Dropdown -->
+                                        <li class="list-inline-item">
+                                            <div class="dropdown">
+                                                <button class="btn btn-icon btn-base" type="button" title="Menu" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="ri-more-fill"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li class="d-block d-sm-none">
+                                                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="#" data-bs-toggle="collapse" data-bs-target="#search-chat" aria-expanded="false">Rechercher
+                                                            <i class="ri-search-line"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li class="d-block d-sm-none">
+                                                        <a class="chat-info-toggle dropdown-item d-flex align-items-center justify-content-between" href="#">Chat Info
+                                                            <i class="ri-information-line"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Archive
+                                                            <i class="ri-archive-line"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Mute
+                                                            <i class="ri-volume-mute-line"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <div class="dropdown-divider"></div>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Block
+                                                            <i class="ri-forbid-line"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                        <!-- Dropdown -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chat Header -->
+
+                    <!-- Chat Search -->
+                    <div>
+                        <div class="border-bottom collapse" id="search-chat">
+                            <div class="px-1 py-4">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control form-control-lg" placeholder="Rechercher dans la discussion" aria-label="Search in chat" aria-describedby="search-in-chat-button">
+                                                <button class="btn btn-white btn-lg border" type="button" id="search-in-chat-button"><i class="ri-search-line"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chat Search -->
+
+                    <!-- Chat Content -->
+                    <div class="chat-content hide-scrollbar h-100" id="autoscroll" >
+                        <!-- Messages -->
+                        <div class="container-fluid g-0 p-4" style="overflow:auto;">
+                            <!-- Message 1 -->
+                            <div id="conversation_user" ></div>
+                            <div class="message" id="typing-notification" style="margin-top:0.5rem">
+                                <div class="message-wrap">
+                                    <div class="message-item">
+                                        <div class="message-content">
+                                            <div>En train d'écrire
+                                                <div class="type-indicator">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- Messages -->
+
+                        <!-- Scroll Chat to Bottom -->
+                        <div class="js-scroll-to-bottom"></div>
+                        <!-- Scroll Chat to Bottom -->
+                    </div>
+                    <!-- Chat Content -->
+
+                    <!-- Chat Footer -->
+                    <div class="chat-footer d-flex align-items-center border-top px-2">
+                        <div class="container-fluid">
+                            <div class="row align-items-center g-4">
+                                <!-- Input -->
+                                <div class="col">
+                                    <div class="input-group">
+                                        <button class="btn btn-white btn-lg border" type="button"><i class="ri-attachment-2"></i></button>
+                                        <input type="text" class="form-control form-control-lg" id="message_input" placeholder="Type message" aria-label="type message">
+                                        <button class="btn btn-white btn-lg border" type="button"><i class="ri-chat-smile-2-line"></i></button>
+                                    </div>
+                                </div>
+                                <!-- Input -->
+
+                                <!-- Button -->
+                                <div class="col-auto">
+                                    <ul class="list-inline d-flex align-items-center mb-0">
+                                        <li class="list-inline-item">
+                                            <button type="submit" class="btn btn-icon btn-primary btn-lg rounded-circle">
+                                                <i class="ri-send-plane-fill"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- Button -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chat Footer -->
+                </div>
+                <!-- Chat -->
+
+                <!-- Chat Info -->
+                <div class="chat-info h-100 border-start">
+                    <div class="d-flex flex-column h-100">
+                        <!-- Header -->
+                        <div class="chat-info-header d-flex align-items-center border-bottom">
+                            <ul class="d-flex justify-content-between align-items-center list-unstyled w-100 mx-4 mb-0">
+                                <!-- Title -->
+                                <li>
+                                    <h3 class="mb-0">A propos de {{ user_conv['first_name'] }}</h3>
+                                </li>
+                                <!-- Title -->
+
+                                <!-- Close Button -->
+                                <li>
+                                    <button class="chat-info-close btn btn-icon btn-base px-0">
+                                        <i class="ri-close-line"></i>
+                                    </button>
+                                </li>
+                                <!-- Close Button -->
+                            </ul>
+                        </div>
+                        <!-- Header -->
+
+                        <!-- Content -->
+                        <div class="hide-scrollbar h-100">
+                            <!-- User Info -->
+                            <div class="text-center p-4 pt-14">
+                                <!-- Avatar -->
+                                <div class="avatar avatar-xl mb-4">
+                                    <img src="data:image/png;base64,{{ user_conv['profile_image'] }}" alt="Profile Image" class="avatar-label bg-soft-success text-success fs-6" style="border-radius: 50%;">
+                                </div>
+                                <!-- Avatar -->
+
+                                <!-- Text -->
+                                <h5>{{ user_conv['first_name'] }} {{ user_conv['last_name'] }}</h5>
+                                <!-- Text -->
+
+                                <!-- Text -->
+                                <p class="text-muted fs-6">{{ user_conv['bio'] }}</p>
+                                <!-- Text -->
+
+                                <!-- Text -->
+                                <div class="text-center">
+                                    <span class="text-muted mb-0">{{ user_conv['description'] }}<br>
+                                </div>
+                                <!-- Text -->
+                            </div>
+                            <!-- User Info -->
+
+                            <!-- Segmented Control -->
+                            <div class="text-center mb-2">
+                                <ul class="nav nav-pills nav-segmented" id="pills-tab-user-profile" role="tablist">
+                                    <!-- About -->
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="pills-about-tab" data-bs-toggle="pill" data-bs-target="#pills-about" type="button" role="tab" aria-controls="pills-about" aria-selected="true">A propos</button>
+                                    </li>
+                                    <!-- About -->
+
+                                    <!-- Files -->
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="pills-files-tab" data-bs-toggle="pill" data-bs-target="#pills-files" type="button" role="tab" aria-controls="pills-files" aria-selected="false">Fichiers</button>
+                                    </li>
+                                    <!-- Files -->
+                                </ul>
+                            </div>
+                            <!-- Segmented Control -->
+
+                            <!-- Tab Content -->
+                            <div class="tab-content" id="pills-tab-user-profile-content">
+                                <!-- About -->
+                                <div class="tab-pane fade show active" id="pills-about" role="tabpanel" aria-labelledby="pills-about-tab">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item py-4">
+                                            <h6 class="mb-1">Prénom / Nom</h6>
+                                            <p class="text-truncate mb-0">{{ user_conv['first_name'] }} {{ user_conv['last_name'] }}</p>
+                                        </li>
+                                        <li class="list-group-item py-4">
+                                            <h6 class="mb-1">Email</h6>
+                                            <p class="text-truncate mb-0">{{ user_conv['email'] }}</p>
+                                        </li>
+                                        <li class="list-group-item py-4">
+                                            <h6 class="mb-1">Situé en</h6>
+                                            <p class="text-truncate mb-0">France</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- About -->
+
+                                <!-- Files -->
+                                <div class="tab-pane fade" id="pills-files" role="tabpanel" aria-labelledby="pills-files-tab">
+                                    <ul class="list-group list-group-flush">
+                                        <!-- File 1 -->
+                                        <li class="list-group-item py-4">
+                                            <div class="row align-items-center gx-4">
+                                                <!-- Icon -->
+                                                <div class="col-auto">
+                                                    <div class="avatar avatar-sm">
+                                                        <span class="avatar-label">
+                                                            <i class="ri-file-line"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <!-- Icon -->
+
+                                                <!-- Text -->
+                                                <div class="col overflow-hidden">
+                                                    <h6 class="text-truncate mb-1">Presentation.pptp</h6>
+                                                    <ul class="list-inline m-0">
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">135 KB</p>
+                                                        </li>
+
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">PPTP</p>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <!-- Text -->
+
+                                                <!-- Dropdown -->
+                                                <div class="col-auto">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-icon btn-base btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="ri-more-fill"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-right">
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Download<i class="ri-download-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Share<i class="ri-share-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <div class="dropdown-divider"></div>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Delete<i class="ri-delete-bin-line"></i></a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <!-- Dropdown -->
+                                            </div>
+                                        </li>
+                                        <!-- File 1 -->
+
+                                        <!-- File 2 -->
+                                        <li class="list-group-item py-4">
+                                            <div class="row align-items-center gx-4">
+                                                <!-- Icon -->
+                                                <div class="col-auto">
+                                                    <div class="avatar avatar-sm">
+                                                        <span class="avatar-label">
+                                                            <i class="ri-file-line"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <!-- Icon -->
+
+                                                <!-- Text -->
+                                                <div class="col overflow-hidden">
+                                                    <h6 class="text-truncate mb-1">Bootstrap.zip</h6>
+                                                    <ul class="list-inline m-0">
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">240 KB</p>
+                                                        </li>
+
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">ZIP</p>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <!-- Text -->
+
+                                                <!-- Dropdown -->
+                                                <div class="col-auto">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-icon btn-base btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="ri-more-fill"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-right">
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Download<i class="ri-download-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Share<i class="ri-share-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <div class="dropdown-divider"></div>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Delete<i class="ri-delete-bin-line"></i></a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <!-- Dropdown -->
+                                            </div>
+                                        </li>
+                                        <!-- File 2 -->
+
+                                        <!-- File 3 -->
+                                        <li class="list-group-item py-4">
+                                            <div class="row align-items-center gx-4">
+                                                <!-- Icon -->
+                                                <div class="col-auto">
+                                                    <div class="avatar avatar-sm">
+                                                        <span class="avatar-label">
+                                                            <i class="ri-image-line"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <!-- Icon -->
+
+                                                <!-- Text -->
+                                                <div class="col overflow-hidden">
+                                                    <h6 class="text-truncate mb-1">Image001.png</h6>
+                                                    <ul class="list-inline m-0">
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">475 KB</p>
+                                                        </li>
+
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">PNG</p>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <!-- Text -->
+
+                                                <!-- Dropdown -->
+                                                <div class="col-auto">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-icon btn-base btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="ri-more-fill"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-right">
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Download<i class="ri-download-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Share<i class="ri-share-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <div class="dropdown-divider"></div>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Delete<i class="ri-delete-bin-line"></i></a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <!-- Dropdown -->
+                                            </div>
+                                        </li>
+                                        <!-- File 3 -->
+
+                                        <!-- File 4 -->
+                                        <li class="list-group-item py-4">
+                                            <div class="row align-items-center gx-4">
+                                                <!-- Icon -->
+                                                <div class="col-auto">
+                                                    <div class="avatar avatar-sm">
+                                                        <span class="avatar-label">
+                                                            <i class="ri-image-line"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <!-- Icon -->
+
+                                                <!-- Text -->
+                                                <div class="col overflow-hidden">
+                                                    <h6 class="text-truncate mb-1">Image002.jpg</h6>
+                                                    <ul class="list-inline m-0">
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">365 KB</p>
+                                                        </li>
+
+                                                        <li class="list-inline-item">
+                                                            <p class="text-uppercase text-muted mb-0 fs-6">JPG</p>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <!-- Text -->
+
+                                                <!-- Dropdown -->
+                                                <div class="col-auto">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-icon btn-base btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="ri-more-fill"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-right">
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Download<i class="ri-download-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Share<i class="ri-share-line"></i></a>
+                                                            </li>
+                                                            <li>
+                                                                <div class="dropdown-divider"></div>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">Delete<i class="ri-delete-bin-line"></i></a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <!-- Dropdown -->
+                                            </div>
+                                        </li>
+                                        <!-- File 4 -->
+                                    </ul>
+                                </div>
+                                <!-- Files -->
+                            </div>
+                            <!-- Tab Content -->
+                        </div>
+                        <!-- Content -->
+                        {% endif %}
+                        {% if not has_contacts %}
+
+    
+                                            <!-- Close Chat Button -->
+                                            <div class="d-block d-xl-none me-3">
+                                                <button class="chat-hide btn btn-icon btn-base btn-sm" type="button">
+                                                    <i class="ri-arrow-left-s-line"></i>
+                                                </button>
+                                            </div>
+
+                        <div class="container-fluid ledivdelamort">
+                            
+                            <div class="row d-flex justify-content-center align-items-center height-vh">
+                                <div class="col-lg-6 col-12">
+                                    <div class="col-md-12">
+                                        <img src="{{ url_for('static', filename='img/dashboard/image.png') }}" alt="" class="img-responsive">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 col-12">
+                                    <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                        <h1 class="main-heading">Tu n'as pas d'amis...</h1>
+                                        <h2>Ajoute des amis pour commencer à discuter !</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Chat Info -->
+            </div>
+        </div>
+        <!-- Main Content -->
+    </div>
+    <!-- Layout -->
+
+    <!-- Account Modal -->
+    <div class="modal fade" id="modal-account" tabindex="-1" aria-labelledby="modal-account" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="profile text-center">
+                    <div class="profile-img text-primary px-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" fill="currentColor">
+                            <defs>
+                                <style>
+                                    .st1 {
+                                        fill: #fff;
+                                        opacity: 0.1;
+                                    }
+                                </style>
+                            </defs>
+                            <path d="M300,0v80c0,11-9,20-20,20H20C9,100,0,91,0,80V0H300z" />
+                            <path class="st1" d="M50,71c-16,0-29,13-29,29h10c0-10.5,8.5-19,19-19s19,8.5,19,19h10C79,84,66,71,50,71z" />
+                            <path class="st1" d="M31.6,0H21.3C21.8,1.6,22,3.3,22,5c0,10.5-8.5,19-19,19c-1,0-2-0.1-3-0.2v10.1C1,34,2,34,3,34c16,0,29-13,29-29
+                                                                                                C32,3.3,31.8,1.6,31.6,0z" />
+                            <path class="st1" d="M238.5,58C217.3,58,200,75.3,200,96.5c0,1.2,0,2.3,0.2,3.5h10.1c-0.1-1.2-0.2-2.3-0.2-3.5
+                                                                                                c0-15.7,12.8-28.5,28.5-28.5S267,80.8,267,96.5c0,1.2-0.1,2.3-0.2,3.5h10.1c0.1-1.2,0.2-2.3,0.2-3.5C277,75.3,259.7,58,238.5,58z" />
+                            <path class="st1" d="M299,22c-11,0-20-9-20-20c0-0.7,0-1.3,0.1-2h-10C269,0.7,269,1.3,269,2c0,16.5,13.5,30,30,30c0.3,0,0.7,0,1,0
+                                                                                                V22C299.7,22,299.3,22,299,22z" />
+                        </svg>
+                    </div>
+                    <div class="profile-content">
+                        <!-- Avatar -->
+                        <div class="avatar avatar-lg">
+                            <img src="data:image/png;base64,{{ user['profile_image'] }}" alt="Profile Image" class="avatar-label bg-soft-success text-success fs-6" style="border-radius: 50%;">
+                        </div>
+                        <!-- Avatar -->
+
+                        <!-- Name -->
+                        <h5 class="m-1">{{ user['first_name'] }} {{ user['last_name'] }}</h5>
+                        <!-- Name -->
+
+                        <!-- Availability -->
+                        <p class="text-muted">{{ user['username'] }}</p>
+                        <!-- Availability -->
+                    </div>
+                </div>
+                
+                <div class="modal-body p-0">
+                    <ul class="list-group list-group-flush">
+                        
+
+                        <!-- Email -->
+                        <li class="list-group-item p-4">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h5 class="mb-1">E-mail</h5>
+                                    <p class="text-muted mb-0">{{ user['email'] }}</p>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-icon btn-light rounded-circle">
+                                        <i class="ri-mail-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Email -->
+
+                        <!-- Options -->
+                        <li class="list-group-item p-4">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h5 class="mb-1">Status en Ligne</h5>
+                                    <p class="text-muted mb-0">Partagez votre status en ligne à vos amis !</p>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="switch-active-status" checked>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Options -->
+                    </ul>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" id="logout_button" class="btn btn-primary">Se déconnecter</button>
+                </div>
+            </div>
+        </div>  
+    </div>
+    <!-- Account Modal -->
+
+    <!-- Add Users -->
+    <div class="modal fade" id="add-users" tabindex="-1" aria-labelledby="add-users" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="profile text-center">
+                    <div class="profile-img text-primary px-5">
+                    </div>
+                </div>
+                
+                <div class="modal-body p-0">
+                    <ul class="list-group list-group-flush">
+                        
+
+                        <!-- Email -->
+                        <li class="list-group-item p-4">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h5 class="mb-1">Son nom d'utilisateur</h5>
+                                    <div class="m-4">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control form-control-lg form-control-solid" placeholder="Nom d'utilisateur" aria-label="Rechercher" aria-describedby="search-user-button">
+                                            <button class="btn btn-secondary btn-lg" type="button" id="search-user-button"><i class="ri-search-line"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Email -->
+                    </ul>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary">Envoyer une demande d'amis</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Users -->
+    
+    <!-- Invite Modal -->
+    <div class="modal fade" id="modal-invite" tabindex="-1" aria-labelledby="modal-invite" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="profile text-center">
+                    <div class="profile-img text-primary px-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" fill="currentColor">
+                            <defs>
+                                <style>
+                                    .st1 {
+                                        fill: #fff;
+                                        opacity: 0.1;
+                                    }
+                                </style>
+                            </defs>
+                            <path d="M300,0v80c0,11-9,20-20,20H20C9,100,0,91,0,80V0H300z" />
+                            <path class="st1" d="M50,71c-16,0-29,13-29,29h10c0-10.5,8.5-19,19-19s19,8.5,19,19h10C79,84,66,71,50,71z" />
+                            <path class="st1" d="M31.6,0H21.3C21.8,1.6,22,3.3,22,5c0,10.5-8.5,19-19,19c-1,0-2-0.1-3-0.2v10.1C1,34,2,34,3,34c16,0,29-13,29-29
+                                                                                                C32,3.3,31.8,1.6,31.6,0z" />
+                            <path class="st1" d="M238.5,58C217.3,58,200,75.3,200,96.5c0,1.2,0,2.3,0.2,3.5h10.1c-0.1-1.2-0.2-2.3-0.2-3.5
+                                                                                                c0-15.7,12.8-28.5,28.5-28.5S267,80.8,267,96.5c0,1.2-0.1,2.3-0.2,3.5h10.1c0.1-1.2,0.2-2.3,0.2-3.5C277,75.3,259.7,58,238.5,58z" />
+                            <path class="st1" d="M299,22c-11,0-20-9-20-20c0-0.7,0-1.3,0.1-2h-10C269,0.7,269,1.3,269,2c0,16.5,13.5,30,30,30c0.3,0,0.7,0,1,0
+                                                                                                V22C299.7,22,299.3,22,299,22z" />
+                        </svg>
+                    </div>
+                    <div class="profile-content">
+                        <!-- Avatar -->
+                        <div class="avatar avatar-lg">
+                            <span class="avatar-label bg-success text-white fs-3">
+                                <i class="ri-user-add-line"></i>
+                            </span>
+                        </div>
+                        <!-- Avatar -->
+
+                        <!-- Text -->
+                        <h5 class="m-1">Invite your friends</h5>
+                        <!-- Text -->
+
+                        <!-- Text -->
+                        <p class="text-muted">Send invitations to one or more friends </p>
+                        <!-- Text -->
+                    </div>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <!-- Email Input -->
+                    <div class="mb-4">
+                        <label for="email-input-1" class="form-label text-muted">E-mail address</label>
+                        <input type="email" class="form-control form-control-lg form-control-solid" id="email-input-1" placeholder="name@example.com">
+                    </div>
+                    <!-- Email Input -->
+
+                    <!-- Textarea Input -->
+                    <div>
+                        <label for="textarea-input-1" class="form-label text-muted">Message</label>
+                        <textarea class="form-control form-control-lg form-control-solid" id="textarea-input-1" placeholder="Message for your friends" rows="3"></textarea>
+                    </div>ze
+                    <!-- Textarea Input -->
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Invite Modal -->
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard/app.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard/script.js') }}"></script>
+    <!-- Scripts -->
+</body>
+
+</html>

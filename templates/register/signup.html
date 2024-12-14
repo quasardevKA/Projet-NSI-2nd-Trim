@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login/login.css') }}">
+    <title>Form</title>
+</head>
+
+<body>
+    <div id="main-container" class="centered-flex">
+        <div class="form-container">
+            <div class="icon centered-flex"><i class="fa fa-user"></i></div>
+            <div class="title">SIGN UP</div>
+            <form id="login-form" class="centered-flex" action="/register" method="post">
+                <div class="msg"></div>
+                <div class="field">
+                    <input type="text" placeholder="Prénom" id="first_name" name="first_name">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="field">
+                    <input type="text" placeholder="Nom" id="last_name" name="last_name">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="field">
+                    <input type="text" placeholder="Username" id="username" name="username">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="field">
+                    <input type="email" placeholder="E-mail" id="email" name="email">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="field">
+                    <input type="password" placeholder="Mot de passe" id="password" name="password">
+                    <i class="fa fa-lock"></i>
+                </div>
+                <div class="field">
+                    <input type="password" placeholder="Confirmer le mot de passe" id="password-confirm" name="password-confirm">
+                    <i class="fa fa-lock"></i>
+                </div>
+                <div class="action centered-flex">
+                    <label for="remember" class="centered-flex">
+                        <input type="checkbox" id="remember"> Remember me
+                    </label>
+
+                </div>
+                <div class="btn-container"><button id="btn">Sign up</button></div>
+                <div class="signup">Tu as déjà un compte ? <a href="/login"> Login</a></div>
+            </form>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='css/register/register.js') }}"></script>
+</body>
+
+</html>

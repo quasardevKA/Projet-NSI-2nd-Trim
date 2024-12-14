@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration des Utilisateurs</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin/admin.css') }}">
+</head>
+
+<body>
+    <h2>Administration des Utilisateurs</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Nom d'utilisateur</th>
+            <th>Email</th>
+            <th>Admin</th>
+            <th>Actions</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <form action="{{ url_for('update_user', user_id=user['id']) }}" method="post">
+                <td>{{ user['id'] }}</td>
+                <td><input type="text" name="first_name" value="{{ user['first_name'] }}"></td>
+                <td><input type="text" name="last_name" value="{{ user['last_name'] }}"></td>
+                <td><input type="text" name="username" value="{{ user['username'] }}"></td>
+                <td><input type="email" name="email" value="{{ user['email'] }}"></td>
+                <td>
+                    <select name="admin">
+                        <option value="1" {% if user['admin'] %}selected{% endif %}>Oui</option>
+                        <option value="0" {% if not user['admin'] %}selected{% endif %}>Non</option>
+                    </select>
+                </td>
+                <td>
+                    <button type="submit">Mettre à jour</button>
+                    <button formaction="{{ url_for('delete_user', user_id=user['id']) }}" type="submit">Supprimer</button>
+                </td>
+            </form>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+
+</html>

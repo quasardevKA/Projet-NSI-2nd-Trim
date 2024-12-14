@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login/login.css') }}">
+    <title>Form</title>
+</head>
+
+<body>
+    <div id="main-container" class="centered-flex">
+        <div class="form-container">
+            <div class="icon centered-flex"><i class="fa fa-user"></i></div>
+            <div class="title">LOGIN</div>
+            <form id="login-form" class="centered-flex" action="/login" method="post">
+                <div class="msg"></div>
+                <div class="field">
+                    <input type="text" placeholder="Username" id="username" name="username">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="field">
+                    <input type="password" placeholder="Password" id="password" name="password">
+                    <i class="fa fa-lock"></i>
+                </div>
+                <div class="action centered-flex">
+                    <label for="remember" class="centered-flex">
+                        <input type="checkbox" id="remember"> Se souvenir de moi
+                    </label>
+                    <a href="/reset_password">Mot de passe oublié ?</a>
+                </div>
+                <div class="btn-container"><button id="btn">Login</button></div>
+                <div class="signup">Pas encore de compte ?<a href="/register"> S'inscrire</a></div>
+            </form>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='css/login/login.js') }}"></script>
+</body>
+
+</html>3

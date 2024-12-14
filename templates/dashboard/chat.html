@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head> 
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/chat.css') }}">
+    </head>
+
+    <body>
+        <div class="chat-window">
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {{ 'sent' if message['sender_id'] == user['id'] else 'received' }}">
+                    <p>{{ message['message'] }}</p>
+                    <span class="timestamp">{{ message['timestamp'] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        
+            <form method="POST" class="message-form">
+                <input type="text" name="message" placeholder="Écrivez un message..." required />
+                <button type="submit">Envoyer</button>
+            </form>
+        </div>
+        <div class="chat-window">
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {{ 'sent' if message['sender_id'] == user['id'] else 'received' }}">
+                    <p>{{ message['message'] }}</p>
+                    <span class="timestamp">{{ message['timestamp'] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        
+            <form method="POST" class="message-form">
+                <input type="text" name="message" placeholder="Écrivez un message..." required />
+                <button type="submit">Envoyer</button>
+            </form>
+        </div>
+        
+        
+    </body>
+
+</html>

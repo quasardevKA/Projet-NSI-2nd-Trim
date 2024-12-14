@@ -1,0 +1,54 @@
+
+<!--  ----------------------------------------------------------------------------  -->
+<!--  ------------------------- Fichier Type by Karl -----------------------------  -->
+<!--  ----------------------------------------------------------------------------  -->
+<!--  Utiliser le plugin Live Preview déjà installé pour visualiser la page en dev  -->
+<!--                                                                                -->
+<!--  Les user ne son pas crypté/hashé jusqu'au serveur, par contre les mots de     -->
+<!--  pass sont crypté avec un bibliotèque js. ( Renforcer le hash à l'avenir )     -->
+<!-- https://cgt6c7dp-3000.uks1.devtunnels.ms/login/index.htmlifconfig -->
+<!--                 user de test : karl.rahuel       mdp: password                 -->
+<!--  Ce que le serveur voit comme mot de passe arrivant sur l'API avec ce mdp:     -->
+<!--  Non crypté: password       crypté (stade 1): 5f4dcc3b5aa765d61d8327deb882cf99 -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Watshupp</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mdp_oublier/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/md5.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="login">
+        <h2>Réinitialiser le Mot de Passe</h2>
+        <form id="loginForm" action="/reset_password" method="post">
+            <input type="email" id="email" name="email" placeholder="Entrez votre Email" required="required" />
+            <button type="submit" class="btn btn-primary btn-block btn-large">Réinitialiser</button>
+        </form>
+        {% if error %}
+        <div id="error-message" style="color: red;">{{ error }}</div>
+        {% else %}
+        <div id="error-message" style="color: red; display: none;"></div>
+        {% endif %}
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io();
+            document.getElementById('loginForm').addEventListener('submit', (event) => {
+                event.preventDefault();
+                const email = document.getElementById('email').value;
+                socket.emit('send_email', { email: email });
+            });
+            socket.on('email_sent', (data) => {
+                alert(data.status);
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+ 

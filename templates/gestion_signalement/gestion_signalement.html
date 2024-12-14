@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_signalement/gestion_signalement.css') }}">
+    <title>Sliding Menu</title>
+</head>
+
+<body>
+    <div id="main-container">
+        <div align="center " class="menu ">
+            <ul class="menu-content ">
+                <li><a href="/dashboard"><span class="material-symbols-outlined "><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg></span><span>Dashboard</span></a></li>
+                <li><a href="/admin"><span class="material-symbols-outlined "><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M680-280q25 0 42.5-17.5T740-340q0-25-17.5-42.5T680-400q-25 0-42.5 17.5T620-340q0 25 17.5 42.5T680-280Zm0 120q31 0 57-14.5t42-38.5q-22-13-47-20t-52-7q-27 0-52 7t-47 20q16 24 42 38.5t57 14.5ZM480-80q-139-35-229.5-159.5T160-516v-244l320-120 320 120v227q-19-8-39-14.5t-41-9.5v-147l-240-90-240 90v188q0 47 12.5 94t35 89.5Q310-290 342-254t71 60q11 32 29 61t41 52q-1 0-1.5.5t-1.5.5Zm200 0q-83 0-141.5-58.5T480-280q0-83 58.5-141.5T680-480q83 0 141.5 58.5T880-280q0 83-58.5 141.5T680-80ZM480-494Z"/></svg></span><span>Admin</span></a></li>
+                <li><a href="# "><span class="material-symbols-outlined ">settings</span><span>Paramètres</span></a></li>
+                <li><a href="# "><span class="material-symbols-outlined ">logout</span><span>Déconnexion</span></a></li>
+            </ul>
+        </div>
+        <div id="admin_reports"></div>
+        <div id="report">
+            {% for user in users %}
+                <center>
+                    <br>
+                    <table>
+                        <tr>
+                            <th>
+                                <img src="{{ url_for( 'static', filename='img/reports/image.png' ) }}"></th>
+                            <td>
+                                <h2>{{ user.reported_first_name }} {{ user.reported_last_name }}</h2>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Raison du signalement : {{ user.reason }}</td>
+                            <tr>
+                                <td>Signalé par : {{ user.reporter_first_name }} {{ user.reporter_last_name }}</td>
+                            </tr>
+                        </tr>
+                        <td class="bouton">
+                            <button onClick="banUser({{ user.reported_user_id }})" class="ban">Ban</button>
+                            <button onClick="delReport({{ user.reported_user_id }})" class="refuse">Refuse</button>
+                          </td>
+                    </table>
+                </center>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/gestion_signalement/script.js') }}"></script>
+</body>
+
+</html>

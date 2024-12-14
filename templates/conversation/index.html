@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Conversation avec {{ other_user['username'] }}</title>
+    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLR3qz7iG/C1+E1F5iN7xDhiR3b1pWbKLaFln69hVI" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+
+            $('#message-form').on('submit', function(event) {
+                event.preventDefault();
+                var messageData = {
+                    receiver_id: "{{ other_user['id'] }}",
+                    message: $('textarea[name="message"]').val()
+                };
+                socket.emit('send_message', messageData);
+                $('textarea[name="message"]').val('');
+            });
+
+            socket.on('receive_message', function(data) {
+                var messageClass = (data.sender_id === "{{ user['id'] }}") ? 'message-sent' : 'message-received';
+                var messageHtml = '<div class="' + messageClass + '"><p>' + data.message + '</p><small>' + data.timestamp + '</small></div>';
+                $('#messages').append(messageHtml);
+            });
+
+            socket.emit('join', { room: "{{ other_user['id'] }}" });
+        });
+    </script>
+</head>
+<body>
+    <h2>Conversation avec {{ other_user['username'] }}</h2>
+    <div id="messages">
+        {% for message in messages %}
+            <div class="{{ 'message-sent' if message['sender_id'] == user['id'] else 'message-received' }}">
+                <p>{{ message['message'] }}</p>
+                <small>{{ message['timestamp'] }}</small>
+            </div>
+        {% endfor %}
+    </div>
+    <form id="message-form">
+        <input type="hidden" name="receiver_id" value="{{ other_user['id'] }}">
+        <textarea name="message" placeholder="Écrire un message" required></textarea>
+        <button type="submit">Envoyer</button>
+    </form>
+</body>
+</html>

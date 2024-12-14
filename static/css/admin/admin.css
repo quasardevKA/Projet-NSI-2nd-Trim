@@ -1,0 +1,64 @@
+/* Style général */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Fond noir foncé */
+    color: #e0e0e0; /* Couleur du texte */
+}
+
+/* En-tête */
+h2 {
+    text-align: center;
+    padding: 20px;
+    background-color: #1a237e; /* Bleu foncé */
+    color: #fff;
+}
+
+/* Table */
+table {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #1a1a1a;
+}
+
+table, th, td {
+    border: 1px solid #2c2c2c;
+}
+
+th, td {
+    padding: 15px;
+    text-align: center;
+}
+
+th {
+    background-color: #3949ab; /* Bleu plus clair */
+    color: #fff;
+}
+
+tr:nth-child(even) {
+    background-color: #2c2c2c;
+}
+
+input[type="text"], input[type="email"], select {
+    width: 95%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #333;
+    border: 1px solid #555;
+    color: #fff;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    background-color: #3949ab;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5c6bc0;
+}
