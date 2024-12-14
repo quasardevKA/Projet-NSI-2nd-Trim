@@ -70,26 +70,6 @@ def get_users_info(user1_id, user2_id):
             
     return user_info
 
-def search_user_in_table(table, selector, variable):
-    if(selector):
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM ' + str(table) + ' WHERE ' + str(selector) + ' = ?', (variable,))
-            result = cursor.fetchone()
-            return result
-    else:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM ')
-            result = cursor.fetchone()
-            return result
-    
-def update_var_in_table(table, selector, selector_var, updated, updated_var):
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('UPDATE ' + str(table) + ' SET ' + str(updated) + ' = ? WHERE ' + str(selector) + ' = ?', (updated_var, selector_var))
-        conn.commit()
-
 
 @app.route('/')
 def home():
@@ -158,7 +138,11 @@ def login():
     session_cookie = request.cookies.get('session_cookie')
 
     if session_cookie:
-        user = search_user_in_table('users', 'session_cookie', session_cookie)
+        with Session(engine) as session:
+            statement = select(User).where(User.session_cookie == session_cookie)
+            results = session.exec(statement)
+            user = results.one()
+            print("Ce user:", user)
 
         if user:
             return redirect(url_for('dashboard'))
@@ -171,24 +155,35 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        user = search_user_in_table('users', 'username', username)
+        user = None
+        with Session(engine) as session:
+            statement = select(User).where(User.username == username)
+            results = session.exec(statement)
+            user = results.first()
 
-        if user and check_password_hash(user['password_hash'], password):
+        if user and check_password_hash(user.password_hash, password):
             session_cookie = generate_session_cookie()
+            print("userid:", user.id)
+            with Session(engine) as sessionuser:
+                statement = select(User).where(User.id == user.id)
+                results = sessionuser.exec(statement)
+                user_update = results.first()
+                print("result: ",  user_update)
 
-            update_var_in_table("users", "id", user['id'], "session_cookie", session_cookie)
-            
+                if(user_update == None):
+                    user_update.session_cookie = session_cookie
+                    session.add(user_update)
+                    session.commit()
+                    print("nouveau user:", user_update)
+
             response = make_response(redirect(url_for('dashboard')))
             response.set_cookie('session_cookie', session_cookie)
-            session['user_id'] = user['id']
-            session['admin'] = user['admin']
             return response
         else:
             error_message = "Nom d'utilisateur ou mot de passe incorrect."
             return render_template('login/login.html', error=error_message)
 
     return render_template('login/login.html')
-
 
 @app.route('/dashboard/', defaults={'contact_id': None})
 @app.route('/dashboard/<contact_id>/')
@@ -199,7 +194,10 @@ def dashboard(contact_id):
         app.logger.error('Session cookie is not present.')
         return redirect(url_for('login'))
 
-    user = search_user_in_table('users', 'session_cookie', session_cookie)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE session_cookie = ?', (session_cookie,))
+        user = cursor.fetchone()
 
     if not user:
         app.logger.error('User with the given session cookie not found.')
@@ -211,7 +209,10 @@ def dashboard(contact_id):
     is_user_admin = user_content.get('admin')
 
     # Vérifier si l'utilisateur a des contacts
-    user_contacts = search_user_in_table('contacts', 'user_id', user_content['id'])
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM contacts WHERE user_id = ?', (user_content['id'],))
+        user_contacts = cursor.fetchall()
 
     if user_contacts and not contact_id:
         # Si l'utilisateur a des contacts et qu'aucun contact_id n'est fourni, rediriger vers le premier contact
@@ -221,7 +222,10 @@ def dashboard(contact_id):
     contact_user_dict = None
 
     if contact_id:
-        contact_user = search_user_in_table('users', 'id', contact_id)
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE id = ?', (contact_id,))
+            contact_user = cursor.fetchone()
 
         if not contact_user:
             app.logger.error('Contact user not found.')
@@ -240,7 +244,10 @@ def reset_password():
     if request.method == 'POST':
         email = request.form['email']
 
-        user = search_user_in_table('users', 'email', email)
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+            user = cursor.fetchone()
 
         if user:
             send_password_reset_email(email)  # Envoi de l'email de réinitialisation
@@ -259,13 +266,18 @@ def admin():
     if not session_cookie:
         return redirect(url_for('login'))
 
-    user = search_user_in_table('users', 'session_cookie', session_cookie)
-        
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE session_cookie = ?', (session_cookie,))
+        user = cursor.fetchone()
 
     if not user or not user['admin']:
         return redirect(url_for('login'))
     
-    users = search_user_in_table('users')
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users')
+        users = cursor.fetchall()
     return render_template('admin/index.html', users=users)
 
 
@@ -276,10 +288,16 @@ def reports():
     if not session_cookie:
         return redirect(url_for('login'))
 
-    user = search_user_in_table('users', 'session_cookie', session_cookie)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE session_cookie = ?', (session_cookie,))
+        user = cursor.fetchone()
 
-    users_not = search_user_in_table('users', 'session_cookie', session_cookie)
-    users = users_list = [dict(user) for user in users_not]
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users')
+        users_not = cursor.fetchall()
+        users = users_list = [dict(user) for user in users_not]
 
     if not user or not user['admin']:
         return redirect(url_for('login'))
@@ -307,7 +325,10 @@ def get_messages(contact_id):
     if not session_cookie:
         return jsonify({'error': 'Session non valide'}), 401
 
-    user = search_user_in_table('users', 'session_cookie', session_cookie)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM users WHERE session_cookie = ?', (session_cookie,))
+        user = cursor.fetchone()
 
     if not user:
         return jsonify({'error': 'Utilisateur introuvable'}), 404
@@ -358,7 +379,10 @@ def update_user(user_id):
     if not session_cookie:
         return redirect(url_for('login'))
 
-    user = search_user_in_table('users', 'session_cookie', session_cookie)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE session_cookie = ?', (session_cookie,))
+        user = cursor.fetchone()
 
     if not user or not user['admin']:
         return redirect(url_for('login'))
@@ -387,7 +411,10 @@ def delete_user(user_id):
     if not session_cookie:
         return redirect(url_for('login'))
 
-    user = search_user_in_table('users', 'session_cookie', session_cookie)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE session_cookie = ?', (session_cookie,))
+        user = cursor.fetchone()
 
     if not user or not user['admin']:
         return redirect(url_for('login'))
